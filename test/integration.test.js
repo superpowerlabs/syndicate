@@ -50,7 +50,7 @@ describe("Integration Test", function () {
 
     console.log(poolFactory.address);
     console.log("block", await ethers.provider.getBlockNumber()); // 5
-    const createPoolTx = await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1, 1050);
+    const createPoolTx = await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1);
     console.log("block", await ethers.provider.getBlockNumber()); // 6
 
     const corePoolAddress = await poolFactory.getPoolAddress(syn.address);
@@ -68,8 +68,6 @@ describe("Integration Test", function () {
     console.log("block", await ethers.provider.getBlockNumber()); // 10
     console.log("approved", (await syn.allowance(user1.address, corePool.address)).toString()/1e18);
 
-    await expect(corePool.connect(user1).stake(normalize(1000),
-            (await ethers.provider.getBlock()).timestamp + 1000, true)).revertedWith("SyndicatePoolBase: invalid lock interval");
     await corePool.connect(user1).stake(normalize(1000),
             (await ethers.provider.getBlock()).timestamp + 1051, true);
     console.log("staked");

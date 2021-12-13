@@ -62,9 +62,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     /// @dev Block number of the last yield distribution event
     uint64 public override lastYieldDistribution;
 
-    /// @dev The minimum about time in seconds need to be locked;
-    uint64 public override minLockTime;
-
     /// @dev Used to calculate yield rewards
     /// @dev This value is different from "reward per token" used in locked pool
     /// @dev Note: stakes are different in duration and "weight" reflects that
@@ -162,7 +159,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
      *      note: _initBlock can be set to the future effectively meaning _sync() calls will do nothing
      * @param _weight number representing a weight of the pool, actual weight fraction
      *      is calculated as that number divided by the total pools weight and doesn't exceed one
-     * @param _minLockTime= minimum amount of lock time needed for this pool
      */
     constructor(
         address _syn,
@@ -170,8 +166,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
         SyndicatePoolFactory _factory,
         address _poolToken,
         uint64 _initBlock,
-        uint32 _weight,
-        uint64 _minLockTime
+        uint32 _weight
     ) SyndicateAware(_syn) {
         // verify the inputs are set
         require(_ssyn != address(0), "sSYN address not set");
@@ -197,7 +192,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
         factory = _factory;
         poolToken = _poolToken;
         weight = _weight;
-        minLockTime = _minLockTime;
 
         // init the dependent internal state variables
         lastYieldDistribution = _initBlock;
@@ -425,7 +419,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
         // validate the inputs
         require(_amount > 0, "SyndicatePoolBase: zero amount");
         require(
-            _lockUntil == 0 || (_lockUntil > now256() && _lockUntil - now256() >= minLockTime),
+            _lockUntil == 0 || (_lockUntil > now256()),
             "SyndicatePoolBase: invalid lock interval"
         );
         // update smart contract state

@@ -22,7 +22,7 @@ import "./ERC20Receiver.sol";
  *      - Mintable: total supply may increase
  *      - Burnable: total supply may decrease
  *
- * @dev Token balances and total supply are effectively 192 bits long, meaning that maximum
+ * @dev ?? Token balances and total supply are effectively 192 bits long, meaning that maximum
  *      possible total supply smart contract is able to track is 2^192 (close to 10^40 tokens)
  *
  * @dev Smart contract doesn't use safe math. All arithmetic operations are overflow/underflow safe.

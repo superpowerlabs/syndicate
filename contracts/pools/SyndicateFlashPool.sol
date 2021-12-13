@@ -44,7 +44,7 @@ contract SyndicateFlashPool is SyndicatePoolBase {
         uint64 _initBlock,
         uint32 _weight,
         uint64 _endBlock
-    ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight, 0) {
+    ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight) {
         // check the inputs which are not checked by the pool base
         require(_endBlock > _initBlock, "end block must be higher than init block");
 

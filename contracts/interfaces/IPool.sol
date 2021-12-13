@@ -37,8 +37,6 @@ interface IPool is ILinkedToSYN {
 
     function weight() external view returns (uint32);
 
-    function minLockTime() external view returns (uint64);
-
     function lastYieldDistribution() external view returns (uint64);
 
     function yieldRewardsPerWeight() external view returns (uint256);
