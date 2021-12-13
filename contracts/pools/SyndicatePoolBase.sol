@@ -767,7 +767,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
      *
      * @dev Reentrancy safe due to the EscrowedSyndicateERC20 design
      */
-    function mintSSyn(address _to, uint256 _value) private {
+    function mintSSyn(address _to, uint256 _value) internal {
         // just delegate call to the target
         EscrowedSyndicateERC20(ssyn).mint(_to, _value);
     }

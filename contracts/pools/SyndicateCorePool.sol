@@ -17,6 +17,10 @@ contract SyndicateCorePool is SyndicatePoolBase {
     /// @dev Flag indicating pool type, false means "core pool"
     bool public constant override isFlashPool = false;
 
+    /// @dev Control parameter of how much reward in sSYN user will get immediately upon staking.
+    /// 0 when feature is disabled.  In base points.
+    uint256 public quickReward;
+
     /// @dev Link to deployed SyndicateVault instance
     address public vault;
 
@@ -88,6 +92,15 @@ contract SyndicateCorePool is SyndicatePoolBase {
         User memory user = users[_staker];
 
         return weightToReward(user.totalWeight, vaultRewardsPerWeight) - user.subVaultRewards;
+    }
+
+    /**
+     */
+    function setQuickReward(uint _quickReward) external {
+        // verify function is executed by the factory owner
+        require(factory.owner() == msg.sender, "access denied");
+        require(_quickReward < 100000, "parameter out of range");
+        quickReward = _quickReward;
     }
 
     /**
@@ -217,6 +230,14 @@ contract SyndicateCorePool is SyndicatePoolBase {
         user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
 
         poolTokenReserve += _amount;
+
+        // distribute quick reward
+        if (quickReward > 0) {
+            if (uint64(now256()) < _lockedUntil) {
+                uint256 reward = (_lockedUntil - now256()) / 365 days * _amount * quickReward / 10000;
+                mintSSyn(_staker, reward);
+            }
+        }
     }
 
     /**
