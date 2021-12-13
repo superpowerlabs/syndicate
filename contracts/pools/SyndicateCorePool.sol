@@ -72,9 +72,8 @@ contract SyndicateCorePool is SyndicatePoolBase {
         SyndicatePoolFactory _factory,
         address _poolToken,
         uint64 _initBlock,
-        uint32 _weight,
-        uint64 _minLockTime
-    ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight, _minLockTime) {}
+        uint32 _weight
+    ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight) {}
 
     /**
      * @notice Calculates current vault rewards value available for address specified

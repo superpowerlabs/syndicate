@@ -97,7 +97,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
         address indexed poolToken,
         address indexed poolAddress,
         uint32 weight,
-        uint64 minLockTime,
         bool isFlashPool
     );
 
@@ -220,16 +219,14 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
      * @param poolToken pool token address (like SYN, or SYN/ETH pair)
      * @param initBlock init block to be used for the pool created
      * @param weight weight of the pool to be created
-     * @param minLockTime minimum amount of time needs to be locked for this pool (seconds)
      */
     function createPool(
         address poolToken,
         uint64 initBlock,
-        uint32 weight,
-        uint64 minLockTime
+        uint32 weight
     ) external virtual onlyOwner {
         // create/deploy new core pool instance
-        IPool pool = new SyndicateCorePool(syn, ssyn, this, poolToken, initBlock, weight, minLockTime);
+        IPool pool = new SyndicateCorePool(syn, ssyn, this, poolToken, initBlock, weight);
 
         // register it within a factory
         registerPool(address(pool));
@@ -248,7 +245,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
         address poolToken = IPool(poolAddr).poolToken();
         bool isFlashPool = IPool(poolAddr).isFlashPool();
         uint32 weight = IPool(poolAddr).weight();
-        uint64 minLockTime = IPool(poolAddr).minLockTime();
 
         // ensure that the pool is not already registered within the factory
         require(pools[poolToken] == address(0), "this pool is already registered");
@@ -260,7 +256,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
         totalWeight += weight;
 
         // emit an event
-        emit PoolRegistered(msg.sender, poolToken, poolAddr, weight, minLockTime, isFlashPool);
+        emit PoolRegistered(msg.sender, poolToken, poolAddr, weight, isFlashPool);
     }
 
     /**
