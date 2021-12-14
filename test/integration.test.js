@@ -56,20 +56,23 @@ describe("Integration Test", function () {
     const corePoolAddress = await poolFactory.getPoolAddress(syn.address);
     const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");
     const corePool = await SyndicateCorePool.attach(corePoolAddress);
+    corePool.setQuickReward(99999);
     console.log("block", await ethers.provider.getBlockNumber()); // 6
     await network.provider.send("evm_mine");
     console.log("block", await ethers.provider.getBlockNumber()); // 7
 
-    await syn.updateRole(corePoolAddress, await syn.ROLE_TOKEN_CREATOR()); // 8
     await ssyn.updateRole(corePoolAddress, await syn.ROLE_TOKEN_CREATOR()); // 9
     console.log("core pool attached at", corePoolAddress, corePool.address);
     console.log("approving");
     await syn.connect(user1).approve(corePool.address, normalize(10000)); // 10
     console.log("block", await ethers.provider.getBlockNumber()); // 10
-    console.log("approved", (await syn.allowance(user1.address, corePool.address)).toString()/1e18);
+    console.log("approved", (await syn.allowance(user1.address, corePool.address)).toString() / 1e18);
 
+    console.log("ssyn before", (await ssyn.balanceOf(user1.address)).toString());
     await corePool.connect(user1).stake(normalize(1000),
-            (await ethers.provider.getBlock()).timestamp + 1051, true);
+            (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
+    console.log("ssyn after", (await ssyn.balanceOf(user1.address)).toString() / 1e18);
+
     console.log("staked");
     console.log("block", await ethers.provider.getBlockNumber()); // 11
     console.log("yield", (await corePool.pendingYieldRewards(user1.address)).toString()/1e18);
@@ -81,7 +84,7 @@ describe("Integration Test", function () {
     console.log("yield", (await corePool.pendingYieldRewards(user1.address)).toString()/1e18);
 
     console.log((await syn.balanceOf(user1.address)).toString()/1e18);
-    await network.provider.send("evm_increaseTime", [100000])
+    await network.provider.send("evm_increaseTime", [366 * 24 * 3600])
     await network.provider.send("evm_mine")
     await corePool.processRewards(true);
 
