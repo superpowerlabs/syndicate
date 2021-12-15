@@ -13,16 +13,16 @@ async function main() {
     contracts: {}
   }
 
-  function add(name, folder) {
-    let source = path.resolve(__dirname, `../artifacts/contracts/${folder}/${name}.sol/${name}.json`)
+  const contractsDir = await fs.readdir(path.resolve(__dirname, '../artifacts/contracts'))
+
+  for (let name of contractsDir) {
+    let tmp = name.split('.')
+    if (tmp[1] !== 'sol') continue
+    name = tmp[0]
+    let source = path.resolve(__dirname, `../artifacts/contracts/${name}.sol/${name}.json`)
     let json = require(source)
     ABIs.contracts[name] = json.abi
   }
-
-  add('SyndicateERC20', 'token')
-  add('EscrowedSyndicateERC20', 'token')
-  add('SyndicatePoolFactory', 'pools')
-
   await fs.writeFile(path.resolve(__dirname, '../export/ABIs.json'), JSON.stringify(ABIs, null, 2))
 }
 

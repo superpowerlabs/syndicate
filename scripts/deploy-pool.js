@@ -10,11 +10,14 @@ const fs = require('fs-extra')
 const path = require('path')
 const requireOrMock = require('require-or-mock');
 const ethers = hre.ethers
-
 const deployed = requireOrMock('export/deployed.json')
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId
+}
+
+function normalize(val, n = 18) {
+  return '' + val + '0'.repeat(n)
 }
 
 async function main() {
@@ -27,25 +30,57 @@ async function main() {
 
   const chainId = await currentChainId()
   const isLocalNode = /1337$/.test(chainId)
-  const [deployer] = await ethers.getSigners()
 
-  console.log(
-      "Deploying contracts with the account:",
-      deployer.address
-  );
+  let [owner, user1, user2] = await ethers.getSigners();
 
-  console.log('Current chain ID', await currentChainId())
+  // deploy Synthetic SYN contract
+  const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20")
+  const ssyn = await SSYN.deploy()
+  await ssyn.deployed()
 
-  console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const SynCityCoupons = await ethers.getContractFactory("SynCityCoupons")
-  const nft = await SynCityCoupons.deploy(chainId !== 56 ? 50 : 8000)
-  await nft.deployed()
+  console.log('ssyn deployed')
 
-  // await nft.setMarketplace(process.env.BINANCE_ADDRESS)
+  // deploy SYN contract
+  const SYN = await ethers.getContractFactory("SyndicateERC20")
+  const syn = await SYN.deploy(owner.address)
+  await syn.deployed()
+
+  console.log('syn deployed')
+
+  let features =
+      (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
+      (await syn.FEATURE_TRANSFERS()) +
+      (await syn.FEATURE_UNSAFE_TRANSFERS() +
+          (await syn.FEATURE_DELEGATIONS()) +
+          (await syn.FEATURE_DELEGATIONS_ON_BEHALF()))
+
+  await syn.updateFeatures(features)
+
+  console.log('syn updated')
+
+console.log(ethers.utils.formatUnits(20000))
+
+
+  await syn.transfer(user1.address, normalize(20000));
+
+  console.log('syn transferred from owner to user1')
+
+  // deploy the pool
+  const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
+
+  const poolFactory = await PoolFactory.deploy(
+      syn.address,
+      ssyn.address,
+      normalize(5000), // synPerBlock
+      100000000, // blockPerUpdate, decrease reward by 3%
+      await ethers.provider.getBlockNumber(),
+      await ethers.provider.getBlockNumber() + 10000000);
 
   const addresses = {
-    SynCityCoupons: nft.address
+    SSYN: ssyn.address,
+    SYN: syn.address,
+    PoolFactory: poolFactory.address
   }
 
   if (!deployed[chainId]) {
@@ -58,10 +93,6 @@ async function main() {
   const deployedJson = path.resolve(__dirname, '../export/deployed.json')
   await fs.ensureDir(path.dirname(deployedJson))
   await fs.writeFile(deployedJson, JSON.stringify(deployed, null, 2))
-
-  const tmpDir = path.resolve(__dirname, '../tmp/SynCityCoupons')
-  await fs.ensureDir(tmpDir)
-  await fs.writeFile(path.join(tmpDir, chainId.toString()), addresses.SynCityCoupons)
 
 }
 
