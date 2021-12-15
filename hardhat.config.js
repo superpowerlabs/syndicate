@@ -1,3 +1,4 @@
+require('dotenv').config()
 require("@nomiclabs/hardhat-waffle");
 require('hardhat-contract-sizer')
 // You need to export an object to set up your config
@@ -20,9 +21,23 @@ module.exports = {
 
   },
   networks: {
-    hardhat: {
+    // hardhat: {
+    //   chainId: 1337,
+    //   allowUnlimitedContractSize: true,
+    // },
+    localhost: {
+      url: "http://localhost:8545",
       chainId: 1337,
-      allowUnlimitedContractSize: true,
+    },
+    ethereum: {
+      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
+      accounts: [process.env.OWNER_PRIVATE_KEY],
+      chainId: 1,
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
+      accounts: [process.env.OWNER_PRIVATE_KEY],
+      chainId: 3,
     },
 
 
