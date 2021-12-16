@@ -58,8 +58,10 @@ async function main() {
   const SYN = await ethers.getContractFactory("SyndicateERC20")
   const syn = await SYN.deploy(owner.address)
   await syn.deployed()
-
   console.log('syn deployed')
+
+  //await syn.transfer(user1.address, normalize(20000));
+  //console.log('syn transferred from owner to user1')
 
   let features =
       (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
@@ -72,21 +74,16 @@ async function main() {
 
   console.log('syn updated')
 
-console.log(ethers.utils.formatUnits(20000))
-
-
-  await syn.transfer(user1.address, normalize(20000));
-
+  await syn.transfer(user1.address, ethers.utils.parseEther('20000'));
   console.log('syn transferred from owner to user1')
 
-
   const addresses = {
-    SYN: syn.address,
+    SyndicateERC20: syn.address,
   }
 
-  setEnvValue('SYNADRESS', addresses.SYN)
+  //setEnvValue('SYNADRESS', addresses.SYN)
   if (!deployed[chainId]) {
-    deployed[chainId] = {}
+   deployed[chainId] = {}
   }
   deployed[chainId] = Object.assign(deployed[chainId], addresses)
 

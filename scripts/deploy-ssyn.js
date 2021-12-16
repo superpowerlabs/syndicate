@@ -7,11 +7,11 @@ const path = require('path')
 const requireOrMock = require('require-or-mock')
 const ethers = hre.ethers
 const deployed = requireOrMock('export/deployed.json')
-const os = require("os");
+//const os = require("os");
 
-const envFilePath = path.resolve(__dirname, "../.env");
+//const envFilePath = path.resolve(__dirname, "../.env");
 // read .env file & convert to array
-const readEnvVars = () => fs.readFileSync(envFilePath, "utf-8").split(os.EOL);
+//const readEnvVars = () => fs.readFileSync(envFilePath, "utf-8").split(os.EOL);
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId
@@ -52,9 +52,9 @@ async function main() {
     console.log('ssyn deployed')
 
     const addresses = {
-      SSYN: ssyn.address,
+      EscrowedSyndicateERC20: ssyn.address,
     }
-    setEnvValue('SSYNADRESS', addresses.SSYN)
+    //setEnvValue('SSYNADRESS', addresses.SSYN)
     if (!deployed[chainId]) {
       deployed[chainId] = {}
     }
