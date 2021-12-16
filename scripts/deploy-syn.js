@@ -11,6 +11,11 @@ const path = require('path')
 const requireOrMock = require('require-or-mock');
 const ethers = hre.ethers
 const deployed = requireOrMock('export/deployed.json')
+const os = require("os");
+
+const envFilePath = path.resolve(__dirname, "../.env");
+// read .env file & convert to array
+const readEnvVars = () => fs.readFileSync(envFilePath, "utf-8").split(os.EOL);
 
 async function currentChainId() {
   return (await ethers.provider.getNetwork()).chainId
@@ -19,6 +24,22 @@ async function currentChainId() {
 function normalize(val, n = 18) {
   return '' + val + '0'.repeat(n)
 }
+
+const setEnvValue = (key, value) => {
+    const envVars = readEnvVars();
+    const targetLine = envVars.find((line) => line.split("=")[0] === key);
+    if (targetLine !== undefined) {
+      // update existing line
+      const targetLineIndex = envVars.indexOf(targetLine);
+      // replace the key/value with the new value
+      envVars.splice(targetLineIndex, 1, `${key}=${value}`);
+    } else {
+      // create new key value
+      envVars.push(`${key}=${value}`);
+    }
+    // write everything back to the file system
+    fs.writeFileSync(envFilePath, envVars.join(os.EOL));
+  };
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -32,14 +53,6 @@ async function main() {
   const isLocalNode = /1337$/.test(chainId)
 
   let [owner, user1, user2] = await ethers.getSigners();
-
-  // deploy Synthetic SYN contract
-  const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20")
-  const ssyn = await SSYN.deploy()
-  await ssyn.deployed()
-
-
-  console.log('ssyn deployed')
 
   // deploy SYN contract
   const SYN = await ethers.getContractFactory("SyndicateERC20")
@@ -66,28 +79,12 @@ console.log(ethers.utils.formatUnits(20000))
 
   console.log('syn transferred from owner to user1')
 
-  // deploy the pool
-  const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
-  console.log('pool fact')
-  console.log(PoolFactory)
-    console.log(syn.address)
-    console.log(ssyn.address)
-    console.log("logging block number ")
-    console.log(await ethers.provider.getBlockNumber)
-  const poolFactory = await PoolFactory.deploy(
-      syn.address,
-      ssyn.address,
-      normalize(5000), // synPerBlock
-      100000000, // blockPerUpdate, decrease reward by 3%
-      await ethers.provider.getBlockNumber(),
-      await ethers.provider.getBlockNumber() + 10000000);
 
   const addresses = {
-    SSYN: ssyn.address,
     SYN: syn.address,
-    PoolFactory: poolFactory.address
   }
 
+  setEnvValue('SYNADRESS', addresses.SYN)
   if (!deployed[chainId]) {
     deployed[chainId] = {}
   }
@@ -101,6 +98,7 @@ console.log(ethers.utils.formatUnits(20000))
 
 }
 
+
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
@@ -109,4 +107,3 @@ main()
       console.error(error);
       process.exit(1);
     });
-
