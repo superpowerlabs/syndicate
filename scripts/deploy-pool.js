@@ -85,7 +85,8 @@ async function main() {
   const addresses = {
     EscrowedSyndicateERC20: ssyn.address,
     SyndicateERC20: syn.address,
-    SyndicatePoolFactory: poolFactory.address
+    SyndicatePoolFactory: poolFactory.address,
+    SyndicateCorePool: corePool.address
   }
 
   if (!deployed[chainId]) {
