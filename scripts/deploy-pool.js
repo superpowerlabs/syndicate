@@ -77,6 +77,11 @@ async function main() {
   await poolFactory.deployed()
   await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1);
 
+  const corePoolAddress = await poolFactory.getPoolAddress(syn.address)
+  const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool")
+  const corePool = await SyndicateCorePool.attach(corePoolAddress)
+  corePool.setQuickReward(99999)
+
   const addresses = {
     EscrowedSyndicateERC20: ssyn.address,
     SyndicateERC20: syn.address,
