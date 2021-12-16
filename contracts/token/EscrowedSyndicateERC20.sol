@@ -5,8 +5,7 @@ import "../utils/ERC20.sol";
 import "../utils/AccessControl.sol";
 
 contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessControl {
-
-  mapping (address => bool) public allowedReceivers;
+  mapping(address => bool) public allowedReceivers;
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
@@ -33,7 +32,7 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
     _burn(msg.sender, amount);
   }
 
-   /**
+  /**
    * @notice Receivers manager is responsible for managing the
    *      list of addresses than can receive transfers.
    * @dev Role ROLE_RECEIVERS_MANAGER allows managing allowedReceivers.
@@ -43,7 +42,7 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
 
   event AllowedReceiversUpdated(address receiver, bool allowed);
 
-   /**
+  /**
    * @notice Must be called by ROLE_RECEIVERS_MANAGER addresses.
    *
    * @param receiver address to be set
@@ -59,14 +58,12 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
     emit AllowedReceiversUpdated(receiver, allowed);
   }
 
-   function _transfer(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal virtual override {
-     require(allowedReceivers[recipient], "sSYN: Non Allowed Receiver");
-     super._transfer(sender, recipient, amount);
-
-   }
-
+  function _transfer(
+    address sender,
+    address recipient,
+    uint256 amount
+  ) internal virtual override {
+    require(allowedReceivers[recipient], "sSYN: Non Allowed Receiver");
+    super._transfer(sender, recipient, amount);
+  }
 }

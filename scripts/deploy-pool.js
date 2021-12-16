@@ -37,10 +37,10 @@ async function main() {
 
   const synAddress = deployed[chainId].SyndicateERC20
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
-  console.log('pool fact')
-  console.log(PoolFactory)
-    console.log("logging block number ")
-    console.log(await ethers.provider.getBlockNumber)
+  // console.log('pool fact')
+  // console.log(PoolFactory)
+  //   console.log("logging block number ")
+  //   console.log(await ethers.provider.getBlockNumber)
   const poolFactory = await PoolFactory.deploy(
       synAddress,
       deployed[chainId].EscrowedSyndicateERC20,
