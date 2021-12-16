@@ -13,25 +13,26 @@ async function main() {
     contracts: {}
   }
 
-  const contractsDir = await fs.readdir(path.resolve(__dirname, '../artifacts/contracts'))
-
-  for (let name of contractsDir) {
-    let tmp = name.split('.')
-    if (tmp[1] !== 'sol') continue
-    name = tmp[0]
-    let source = path.resolve(__dirname, `../artifacts/contracts/${name}.sol/${name}.json`)
+  function abi(name, folder) {
+    let source = path.resolve(__dirname, `../artifacts/contracts/${folder}/${name}.sol/${name}.json`)
     let json = require(source)
     ABIs.contracts[name] = json.abi
   }
+
+  abi('EscrowedSyndicateERC20', 'token')
+  abi('SyndicateERC20', 'token')
+  abi('SyndicatePoolFactory', 'pools')
+  abi('SyndicateCorePool', 'pools')
+
   await fs.writeFile(path.resolve(__dirname, '../export/ABIs.json'), JSON.stringify(ABIs, null, 2))
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
 
