@@ -59,10 +59,7 @@ async function main() {
 
   console.log('syn updated')
 
-console.log(ethers.utils.formatUnits(20000))
-
-
-  await syn.transfer(user1.address, normalize(20000));
+  await syn.transfer(user1.address, ethers.utils.parseEther('20000'));
 
   console.log('syn transferred from owner to user1')
 
@@ -72,15 +69,18 @@ console.log(ethers.utils.formatUnits(20000))
   const poolFactory = await PoolFactory.deploy(
       syn.address,
       ssyn.address,
-      normalize(5000), // synPerBlock
+      ethers.utils.parseEther('5000'), // synPerBlock
       100000000, // blockPerUpdate, decrease reward by 3%
       await ethers.provider.getBlockNumber(),
-      await ethers.provider.getBlockNumber() + 10000000);
+      await ethers.provider.getBlockNumber() + 10000000
+  );
+  await poolFactory.deployed()
+  await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1);
 
   const addresses = {
-    SSYN: ssyn.address,
-    SYN: syn.address,
-    PoolFactory: poolFactory.address
+    EscrowedSyndicateERC20: ssyn.address,
+    SyndicateERC20: syn.address,
+    SyndicatePoolFactory: poolFactory.address
   }
 
   if (!deployed[chainId]) {
