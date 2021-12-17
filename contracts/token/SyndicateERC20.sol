@@ -665,7 +665,7 @@ contract SyndicateERC20 is AccessControl {
     // it's not part of ERC20 standard but it's reasonable to fail fast
     require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
 
-    // if transfer on behave is not allowed, then approve is also not allow, unless it's white listed
+    // if transfer on behave is not allowed, then approve is also not allowed, unless it's white listed
     require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
