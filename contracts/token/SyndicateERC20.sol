@@ -473,8 +473,6 @@ contract SyndicateERC20 is AccessControl {
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
 
-    require(FEATURE_TRANSFERS_ON_BEHALF || isSenderInRole(ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
-
     // depending on `FEATURE_UNSAFE_TRANSFERS` we execute either safe (default)
     // or unsafe transfer
     // if `FEATURE_UNSAFE_TRANSFERS` is enabled
@@ -576,7 +574,7 @@ contract SyndicateERC20 is AccessControl {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
     require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-         || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF),
+         || _from != msg.sender && (isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isSenderInRole(ROLE_WHITE_LISTED_SPENDER)),
             _from == msg.sender? "transfers are disabled": "transfers on behalf are disabled");
 
     // non-zero source address check - Zeppelin
@@ -668,7 +666,7 @@ contract SyndicateERC20 is AccessControl {
     require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
 
     // if transfer on behave is not allowed, then approve is also not allow, unless it's white listed
-    require(FEATURE_TRANSFERS_ON_BEHALF || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
+    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
     uint256 _oldValue = transferAllowances[msg.sender][_spender];
