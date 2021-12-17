@@ -32,38 +32,16 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
     _burn(msg.sender, amount);
   }
 
-  /**
-   * @notice Receivers manager is responsible for managing the
-   *      list of addresses than can receive transfers.
-   * @dev Role ROLE_RECEIVERS_MANAGER allows managing allowedReceivers.
-   *      (calling `updateAllowedReceivers` function)
-   */
-  uint32 public constant ROLE_RECEIVERS_MANAGER = 0x0002_0000;
+  uint32 public constant ROLE_WHITE_LISTED_RECEIVER = 0x0002_0000;
 
-  event AllowedReceiversUpdated(address receiver, bool allowed);
+   function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual override {
+     require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
+     super._transfer(sender, recipient, amount);
+   }
 
-  /**
-   * @notice Must be called by ROLE_RECEIVERS_MANAGER addresses.
-   *
-   * @param receiver address to be set
-   * @param allowed if the receiver will be allowed to receive sSYN
-   */
-  function updateAllowedReceivers(address receiver, bool allowed) external {
-    require(isSenderInRole(ROLE_RECEIVERS_MANAGER), "sSYN: ROLE_RECEIVERS_MANAGER required");
-    if (!allowed) {
-      delete allowedReceivers[receiver];
-    } else {
-      allowedReceivers[receiver] = true;
-    }
-    emit AllowedReceiversUpdated(receiver, allowed);
-  }
-
-  function _transfer(
-    address sender,
-    address recipient,
-    uint256 amount
-  ) internal virtual override {
-    require(allowedReceivers[recipient], "sSYN: Non Allowed Receiver");
-    super._transfer(sender, recipient, amount);
-  }
 }
+

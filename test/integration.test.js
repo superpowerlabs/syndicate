@@ -100,8 +100,7 @@ describe("Integration Test", function () {
     console.log("ownver voting power", (await syn.getVotingPower(owner.address)).toString()/1e18);
     console.log("user1 voting power", (await syn.getVotingPower(user1.address)).toString()/1e18);
     await expect(ssyn.connect(user1).transfer(user2.address, normalize(10000))).revertedWith("sSYN: Non Allowed Receiver");
-    await expect(ssyn.connect(user1).updateAllowedReceivers(user2.address, true)).revertedWith("sSYN: ROLE_RECEIVERS_MANAGER required");
-    await ssyn.updateAllowedReceivers(user2.address, true);
+    await ssyn.updateRole(user2.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
     await ssyn.connect(user1).transfer(user2.address, normalize(10000));
     console.log("user2 sSYN balance", (await ssyn.balanceOf(user2.address)).toString()/1e18);
 
