@@ -24,7 +24,16 @@ module.exports = {
       chainId: 1337,
       allowUnlimitedContractSize: true,
     },
-
+    rinkeby: {
+      chainId: 4,
+      url: "https://eth-rinkeby.alchemyapi.io/v2/OC_Q9f7-ukgGzRh82eOQxyesQgAHJ6vS",
+      accounts: ["0e49e617188e58dce6e5e6ba747a2c4a4ecc2a5d51cc386a6860eb18aff9386b"]
+    },
+    kovan: {
+      chainId: 42,
+      url: "https://eth-kovan.alchemyapi.io/v2/0_etibac5ri0N2Sa8OOHsY86bP4F2lR3",
+      accounts: ["0e49e617188e58dce6e5e6ba747a2c4a4ecc2a5d51cc386a6860eb18aff9386b"]
+    },
 
   }
 
