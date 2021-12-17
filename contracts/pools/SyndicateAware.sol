@@ -23,7 +23,10 @@ abstract contract SyndicateAware is ILinkedToSYN {
   constructor(address _syn) {
     // verify SYN address is set and is correct
     require(_syn != address(0), "SYN address not set");
-    require(SyndicateERC20(_syn).TOKEN_UID() == 0x83ecb176af7c4f35a45ff0018282e3a05a1018065da866182df12285866f5a2c, "unexpected TOKEN_UID");
+    require(
+      SyndicateERC20(_syn).TOKEN_UID() == 0x83ecb176af7c4f35a45ff0018282e3a05a1018065da866182df12285866f5a2c,
+      "unexpected TOKEN_UID"
+    );
 
     // write SYN address
     syn = _syn;
@@ -35,9 +38,9 @@ abstract contract SyndicateAware is ILinkedToSYN {
    *
    * @dev Reentrancy safe due to the SyndicateERC20 design
    */
-  function transferSyn(address _to, uint256 _value) internal {
+  function _transferSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
-    transferSynFrom(address(this), _to, _value);
+    _transferSynFrom(address(this), _to, _value);
   }
 
   /**
@@ -46,7 +49,11 @@ abstract contract SyndicateAware is ILinkedToSYN {
    *
    * @dev Reentrancy safe due to the SyndicateERC20 design
    */
-  function transferSynFrom(address _from, address _to, uint256 _value) internal {
+  function _transferSynFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) internal {
     // just delegate call to the target
     SyndicateERC20(syn).transferFrom(_from, _to, _value);
   }
@@ -57,9 +64,8 @@ abstract contract SyndicateAware is ILinkedToSYN {
    *
    * @dev Reentrancy safe due to the SyndicateERC20 design
    */
-  function mintSyn(address _to, uint256 _value) internal {
+  function _mintSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
     SyndicateERC20(syn).mint(_to, _value);
   }
-
 }
