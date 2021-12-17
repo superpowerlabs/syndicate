@@ -22,7 +22,7 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
    * @param amount number of tokens to be minted.
    */
   function mint(address recipient, uint256 amount) external {
-    require(isSenderInRole(ROLE_TOKEN_CREATOR), "insufficient privileges (ROLE_TOKEN_CREATOR required)");
+    require(isSenderInRole(ROLE_TOKEN_CREATOR), "sSYN: insufficient privileges (ROLE_TOKEN_CREATOR required)");
     _mint(recipient, amount);
   }
 

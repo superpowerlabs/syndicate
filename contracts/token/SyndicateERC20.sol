@@ -279,6 +279,8 @@ contract SyndicateERC20 is AccessControl {
    */
   uint32 public constant ROLE_ERC20_SENDER = 0x0008_0000;
 
+  uint32 public constant ROLE_WHITE_LISTED_SPENDER = 0x0010_0000;
+
   /**
    * @dev Magic value to be returned by ERC20Receiver upon successful reception of token(s)
    * @dev Equal to `bytes4(keccak256("onERC20Received(address,address,uint256,bytes)"))`,
@@ -470,6 +472,9 @@ contract SyndicateERC20 is AccessControl {
    * @return success true on success, throws otherwise
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+
+    require(FEATURE_TRANSFERS_ON_BEHALF || isSenderInRole(ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
+
     // depending on `FEATURE_UNSAFE_TRANSFERS` we execute either safe (default)
     // or unsafe transfer
     // if `FEATURE_UNSAFE_TRANSFERS` is enabled
@@ -578,10 +583,10 @@ contract SyndicateERC20 is AccessControl {
     // obviously, zero source address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
     // since for zero value transfer transaction succeeds otherwise
-    require(_from != address(0), "ERC20: transfer from the zero address"); // Zeppelin msg
+    require(_from != address(0), "SYN: transfer from the zero address"); // Zeppelin msg
 
     // non-zero recipient address check
-    require(_to != address(0), "ERC20: transfer to the zero address"); // Zeppelin msg
+    require(_to != address(0), "SYN: transfer to the zero address"); // Zeppelin msg
 
     // sender and recipient cannot be the same
     require(_from != _to, "sender and recipient are the same (_from = _to)");
@@ -607,7 +612,7 @@ contract SyndicateERC20 is AccessControl {
       uint256 _allowance = transferAllowances[_from][msg.sender];
 
       // verify sender has an allowance to transfer amount of tokens requested
-      require(_allowance >= _value, "ERC20: transfer amount exceeds allowance"); // Zeppelin msg
+      require(_allowance >= _value, "SYN: transfer amount exceeds allowance"); // Zeppelin msg
 
       // update allowance value on the stack
       _allowance -= _value;
@@ -623,7 +628,7 @@ contract SyndicateERC20 is AccessControl {
     }
 
     // verify sender has enough tokens to transfer on behalf
-    require(tokenBalances[_from] >= _value, "ERC20: transfer amount exceeds balance"); // Zeppelin msg
+    require(tokenBalances[_from] >= _value, "SYN: transfer amount exceeds balance"); // Zeppelin msg
 
     // perform the transfer:
     // decrease token owner (sender) balance
@@ -660,7 +665,10 @@ contract SyndicateERC20 is AccessControl {
     // non-zero spender address check - Zeppelin
     // obviously, zero spender address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
-    require(_spender != address(0), "ERC20: approve to the zero address"); // Zeppelin msg
+    require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
+
+    // if transfer on behave is not allowed, then approve is also not allow, unless it's white listed
+    require(FEATURE_TRANSFERS_ON_BEHALF || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
     uint256 _oldValue = transferAllowances[msg.sender][_spender];
@@ -743,7 +751,7 @@ contract SyndicateERC20 is AccessControl {
     require(_value > 0, "zero value approval decrease");
 
     // verify allowance decrease doesn't underflow
-    require(currentVal >= _value, "ERC20: decreased allowance below zero");
+    require(currentVal >= _value, "SYN: decreased allowance below zero");
 
     // delegate call to `approve` with the new value
     return approve(_spender, currentVal - _value);
@@ -771,7 +779,7 @@ contract SyndicateERC20 is AccessControl {
     require(isSenderInRole(ROLE_TOKEN_CREATOR), "insufficient privileges (ROLE_TOKEN_CREATOR required)");
 
     // non-zero recipient address check
-    require(_to != address(0), "ERC20: mint to the zero address"); // Zeppelin msg
+    require(_to != address(0), "SYN: mint to the zero address"); // Zeppelin msg
 
     // non-zero _value and arithmetic overflow check on the total supply
     // this check automatically secures arithmetic overflow on the individual balance
@@ -827,7 +835,7 @@ contract SyndicateERC20 is AccessControl {
         uint256 _allowance = transferAllowances[_from][msg.sender];
 
         // verify sender has an allowance to burn amount of tokens requested
-        require(_allowance >= _value, "ERC20: burn amount exceeds allowance"); // Zeppelin msg
+        require(_allowance >= _value, "SYN: burn amount exceeds allowance"); // Zeppelin msg
 
         // update allowance value on the stack
         _allowance -= _value;
@@ -851,11 +859,11 @@ contract SyndicateERC20 is AccessControl {
     require(_value != 0, "zero value burn");
 
     // non-zero source address check - Zeppelin
-    require(_from != address(0), "ERC20: burn from the zero address"); // Zeppelin msg
+    require(_from != address(0), "SYN: burn from the zero address"); // Zeppelin msg
 
     // verify `_from` address has enough tokens to destroy
     // (basically this is a arithmetic overflow check)
-    require(tokenBalances[_from] >= _value, "ERC20: burn amount exceeds balance"); // Zeppelin msg
+    require(tokenBalances[_from] >= _value, "SYN: burn amount exceeds balance"); // Zeppelin msg
 
     // perform burn:
     // decrease `_from` address balance
