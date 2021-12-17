@@ -33,7 +33,6 @@
     "compile": "npx hardhat compile",
     "size": "npx hardhat size-contracts",
     "export": "bin/exportABIs.js",
-    "lint": "prettier --write 'contracts/**/*.sol' && solhint 'contracts/**/*.sol'",
-    "dotenv": "^10.0.0"
+    "lint": "prettier --write 'contracts/**/*.sol' && solhint 'contracts/**/*.sol'"
   }
 }
