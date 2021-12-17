@@ -35,7 +35,7 @@
     "lint": "prettier --write 'contracts/**/*.sol' && solhint 'contracts/**/*.sol'"
   },
   "dependencies": {
-    "ansi-regex": "^6.0.1",
+    "ansi-regex": "^5.0.1",
     "braces": "^3.0.2",
     "dotenv": "^10.0.0",
     "glob-parent": "^6.0.2",
