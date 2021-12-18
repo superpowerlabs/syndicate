@@ -16,7 +16,7 @@ describe("Integration Test", function () {
 
   it("should verify that the entire process works", async function () {
     console.log("block", await ethers.provider.getBlockNumber());
-    let [owner, user1, user2] = await ethers.getSigners();
+    let [owner, user1, user2, user3] = await ethers.getSigners();
     const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20");
     const ssyn = await SSYN.deploy();
     console.log("block", await ethers.provider.getBlockNumber());
@@ -103,6 +103,19 @@ describe("Integration Test", function () {
     await ssyn.updateRole(user2.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
     await ssyn.connect(user1).transfer(user2.address, normalize(10000));
     console.log("user2 sSYN balance", (await ssyn.balanceOf(user2.address)).toString()/1e18);
+
+    features =
+        (await syn.FEATURE_TRANSFERS()) + (await syn.FEATURE_UNSAFE_TRANSFERS() + (await syn.FEATURE_DELEGATIONS())
+        + (await syn.FEATURE_DELEGATIONS_ON_BEHALF()));
+    await syn.updateFeatures(features)
+
+    await expect(syn.connect(user1).approve(user2.address, normalize(5000))).revertedWith("SYN: spender not allowed");
+    await syn.updateRole(user2.address, await syn.ROLE_WHITE_LISTED_SPENDER());
+    await syn.connect(user1).approve(user2.address, normalize(5000));
+    console.log((await syn.balanceOf(user1.address)).toString()/1e18);
+    await syn.connect(user2).transferFrom(user1.address, user3.address, normalize(5000));
+    console.log((await syn.balanceOf(user3.address)).toString()/1e18);
+
 
     })
 })
