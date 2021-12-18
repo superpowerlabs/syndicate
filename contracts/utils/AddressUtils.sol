@@ -9,7 +9,6 @@ pragma solidity 0.8.1;
  * @author Basil Gorin
  */
 library AddressUtils {
-
   /**
    * @notice Checks if the target address is a contract
    * @dev This function will return false if invoked during the constructor of a contract,
@@ -34,5 +33,4 @@ library AddressUtils {
     // positive size indicates a smart contract address
     return size > 0;
   }
-
 }
