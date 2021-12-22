@@ -44,6 +44,7 @@ describe("Integration Test", function () {
 
     const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory");
 
+    // deploy factory
     const poolFactory = await PoolFactory.deploy(syn.address, ssyn.address,
         normalize(5000), // synPerBlock
         100000000, // blockPerUpdate, decrease reward by 3%
@@ -116,8 +117,6 @@ describe("Integration Test", function () {
     await syn.connect(user1).approve(user2.address, normalize(5000));
     console.log((await syn.balanceOf(user1.address)).toString() / 1e18);
     await syn.connect(user2).transferFrom(user1.address, user3.address, normalize(5000));
-    console.log((await syn.balanceOf(user3.address)).toString() / 1e18);
-
-
-  })
+    console.log((await syn.balanceOf(user3.address)).toString()/1e18);
+    })
 })
