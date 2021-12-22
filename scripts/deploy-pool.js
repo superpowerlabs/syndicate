@@ -40,7 +40,7 @@ async function main() {
   const corePool = await SyndicateCorePool.attach(corePoolAddress)
   await corePool.deployed()
   console.log('SyndicateCorePool deployed at', corePool.address)
-  corePool.setQuickReward(ethers.BigNumber.from(QUICK_REWARDS)) // 3000 > 30%
+  corePool.setQuickReward(ethers.BigNumber.from(QUICK_REWARDS))
 
   const syn = deployUtils.getContract('SyndicateERC20', deployed[chainId].SyndicateERC20, chainId)
   const ssyn = deployUtils.getContract('EscrowedSyndicateERC20', deployed[chainId].EscrowedSyndicateERC20, chainId)
