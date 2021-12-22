@@ -400,7 +400,7 @@ contract SyndicateERC20 is AccessControl {
     require(_initialHolder != address(0), "_initialHolder not set (zero address)");
 
     // mint initial supply
-    mint(_initialHolder, 7_000_000e18);
+    mint(_initialHolder, 700_000_000e18);
   }
 
   // ===== Start: ERC20/ERC223/ERC777 functions =====
@@ -586,9 +586,11 @@ contract SyndicateERC20 is AccessControl {
   ) public {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
-    require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-         || _from != msg.sender && (isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isSenderInRole(ROLE_WHITE_LISTED_SPENDER)),
-            _from == msg.sender? "transfers are disabled": "transfers on behalf are disabled");
+    require(
+      (_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)) ||
+        (_from != msg.sender && (isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isSenderInRole(ROLE_WHITE_LISTED_SPENDER))),
+      _from == msg.sender ? "transfers are disabled" : "transfers on behalf are disabled"
+    );
     // non-zero source address check - Zeppelin
     // obviously, zero source address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
@@ -678,7 +680,10 @@ contract SyndicateERC20 is AccessControl {
     require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
 
     // if transfer on behave is not allowed, then approve is also not allowed, unless it's white listed
-    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
+    require(
+      isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER),
+      "SYN: spender not allowed"
+    );
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
     uint256 _oldValue = transferAllowances[msg.sender][_spender];

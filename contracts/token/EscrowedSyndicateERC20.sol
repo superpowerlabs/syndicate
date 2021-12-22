@@ -34,14 +34,12 @@ contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessCo
 
   uint32 public constant ROLE_WHITE_LISTED_RECEIVER = 0x0002_0000;
 
-   function _transfer(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal virtual override {
-     require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
-     super._transfer(sender, recipient, amount);
-   }
-
+  function _transfer(
+    address sender,
+    address recipient,
+    uint256 amount
+  ) internal virtual override {
+    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
+    super._transfer(sender, recipient, amount);
+  }
 }
-
