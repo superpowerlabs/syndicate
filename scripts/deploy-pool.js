@@ -14,6 +14,7 @@ let deployUtils
 async function main() {
   deployUtils = new DeployUtils(ethers)
   const chainId = await deployUtils.currentChainId()
+  const [owner] = await ethers.getSigners()
 
   const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPIER, QUICK_REWARDS} = process.env
   if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPIER || !QUICK_REWARDS) {
@@ -39,11 +40,15 @@ async function main() {
   const corePool = await SyndicateCorePool.attach(corePoolAddress)
   await corePool.deployed()
   console.log('SyndicateCorePool deployed at', corePool.address)
-  corePool.setQuickReward(ethers.BigNumber.from(QUICK_REWARDS))
+  corePool.setQuickReward(ethers.BigNumber.from(QUICK_REWARDS)) // 3000 > 30%
+
+  const syn = deployUtils.getContract('SyndicateERC20', deployed[chainId].SyndicateERC20, chainId)
+  const ssyn = deployUtils.getContract('EscrowedSyndicateERC20', deployed[chainId].EscrowedSyndicateERC20, chainId)
+  await ssyn.connect(owner).updateRole(corePoolAddress, await syn.ROLE_TOKEN_CREATOR()); // 9
 
   await deployUtils.saveDeployed(chainId,
       ['SyndicatePoolFactory', 'SyndicateCorePool'],
-      [poolFactory.address,corePool.address]
+      [poolFactory.address, corePool.address]
   )
 
 }

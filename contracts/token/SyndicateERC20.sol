@@ -400,7 +400,7 @@ contract SyndicateERC20 is AccessControl {
     require(_initialHolder != address(0), "_initialHolder not set (zero address)");
 
     // mint initial supply
-    mint(_initialHolder, 7_000_000e18);
+    mint(_initialHolder, 700_000_000e18);
   }
 
   // ===== Start: ERC20/ERC223/ERC777 functions =====
