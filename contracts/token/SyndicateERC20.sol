@@ -16,9 +16,9 @@ import "./ERC20Receiver.sol";
  *      - Symbol: SYN
  *      - Name: Syndicate
  *      - Decimals: 18
- *      - Initial token supply: 7,000,000 SYN
- *      - Maximum final token supply: 10,000,000 SYN
- *          - Up to 3,000,000 SYN may get minted in 3 years period via yield farming
+ *      - Initial token supply: 700,000,000 SYN
+ *      - Maximum final token supply: 1,000,000,000 SYN
+ *          - Up to 300,000,000 SYN may get minted in 3 years period via yield farming
  *      - Mintable: total supply may increase
  *      - Burnable: total supply may decrease
  *
@@ -105,7 +105,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Field is declared public: getter totalSupply() is created when compiled,
    *      it returns the amount of tokens in existence.
    */
-  uint256 public totalSupply; // is set to 7 million * 10^18 in the constructor
+  uint256 public totalSupply; // is set to 700 million * 10^18 in the constructor
 
   /**
    * @dev A record of all the token balances
@@ -794,6 +794,8 @@ contract SyndicateERC20 is AccessControl {
     // non-zero _value and arithmetic overflow check on the total supply
     // this check automatically secures arithmetic overflow on the individual balance
     require(totalSupply + _value > totalSupply, "zero value mint or arithmetic overflow");
+
+    require(totalSupply + _value <= 1_000_000_000_000e18, "reached total max supply");
 
     // uint192 overflow check (required by voting delegation)
     require(totalSupply + _value <= type(uint192).max, "total supply overflow (uint192)");
