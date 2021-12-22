@@ -16,8 +16,8 @@ async function main() {
   const chainId = await deployUtils.currentChainId()
   const [owner] = await ethers.getSigners()
 
-  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPIER, QUICK_REWARDS} = process.env
-  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPIER || !QUICK_REWARDS) {
+  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, QUICK_REWARDS} = process.env
+  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !QUICK_REWARDS) {
     throw new Error('Missing parameters')
   }
 
@@ -29,7 +29,7 @@ async function main() {
       ethers.utils.parseEther(SYN_PER_BLOCK),
       ethers.BigNumber.from(BLOCK_PER_UPDATE),
       await ethers.provider.getBlockNumber(),
-      (await ethers.provider.getBlockNumber()) + parseInt(BLOCK_MULTIPIER)
+      (await ethers.provider.getBlockNumber()) + parseInt(BLOCK_MULTIPLIER)
   );
   await poolFactory.deployed()
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
