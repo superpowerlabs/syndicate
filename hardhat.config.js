@@ -24,10 +24,10 @@ module.exports = {
 
   },
   networks: {
-     hardhat: {
-       chainId: 1337,
-       allowUnlimitedContractSize: true,
-    },
+    //  hardhat: {
+    //    chainId: 1337,
+    //    allowUnlimitedContractSize: true,
+    // },
     localhost: {
       url: "http://localhost:8545",
       chainId: 1337,
@@ -45,7 +45,7 @@ module.exports = {
     kovan: {
       url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
       accounts: [envJson.kovan.privateKey],
-      chainId: 3,
+      chainId: 42,
     },
 
 
