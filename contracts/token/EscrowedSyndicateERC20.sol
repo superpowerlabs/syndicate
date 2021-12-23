@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../utils/ERC20.sol";
 import "../utils/AccessControl.sol";
 
-contract EscrowedSyndicateERC20 is ERC20("Escrowed Syndicate", "sSYN"), AccessControl {
+contract EscrowedSyndicateERC20 is ERC20("SYN Credit", "CRED"), AccessControl {
   mapping(address => bool) public allowedReceivers;
   /**
    * @dev Smart contract unique identifier, a random number

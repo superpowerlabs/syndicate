@@ -2,12 +2,6 @@ const path = require('path');
 const fs = require('fs-extra');
 const {Contract} = require('@ethersproject/contracts')
 
-const ABIs = {
-  SyndicateERC20: require('../../artifacts/contracts/token/SyndicateERC20.sol/SyndicateERC20.json').abi,
-  EscrowedSyndicateERC20: require('../../artifacts/contracts/token/EscrowedSyndicateERC20.sol/EscrowedSyndicateERC20.json').abi
-}
-
-
 class DeployUtils {
 
   constructor(ethers) {
@@ -38,15 +32,22 @@ class DeployUtils {
 
   }
 
-  getContract(name, address, chainId) {
-    return new Contract(address, ABIs[name], this.getProviders()[chainId])
+  async getABI(name, folder) {
+    const fn = path.resolve(__dirname, `../../artifacts/contracts/${folder}/${name}.sol/${name}.json`)
+    if (fs.pathExists(fn)) {
+      return JSON.parse(await fs.readFile(fn, 'utf8')).abi
+    }
+  }
+
+  async getContract(name, folder, address, chainId) {
+    return new Contract(address, await this.getABI(name, folder), this.getProviders()[chainId])
   }
 
   async currentChainId() {
     return (await this.ethers.provider.getNetwork()).chainId
   }
 
-  async saveDeployed(chainId, names, addresses) {
+  async saveDeployed(chainId, names, addresses, extras) {
     if (names.length !== addresses.length) {
       throw new Error('Inconsistent arrays')
     }
@@ -64,6 +65,17 @@ class DeployUtils {
       data[names[i]] = addresses[i]
     }
     deployed[chainId] = Object.assign(deployed[chainId], data)
+
+    if (extras) {
+      // data needed for verifications
+      if (!deployed.extras) {
+        deployed.extras = {}
+      }
+      if (!deployed.extras[chainId]) {
+        deployed.extras[chainId] = {}
+      }
+      deployed.extras[chainId] = Object.assign(deployed.extras[chainId], extras)
+    }
     // console.log(deployed)
     await fs.writeFile(deployedJson, JSON.stringify(deployed, null, 2))
   }

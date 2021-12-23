@@ -1,6 +1,7 @@
 require('dotenv').config()
 require("@nomiclabs/hardhat-waffle");
 require('hardhat-contract-sizer')
+require("@nomiclabs/hardhat-etherscan");
 const {requirePath} = require('require-or-mock')
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -47,9 +48,9 @@ module.exports = {
       accounts: [envJson.kovan.privateKey],
       chainId: 42,
     },
-
-
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_KEY
   }
-
 };
 
