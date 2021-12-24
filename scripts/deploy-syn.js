@@ -10,8 +10,12 @@ async function main() {
   const chainId = await deployUtils.currentChainId()
   let [owner] = await ethers.getSigners();
 
+  if (!process.env.MAX_TOTAL_SUPPLY) {
+    throw new Error('Missing parameters')
+  }
+
   const SYN = await ethers.getContractFactory("SyndicateERC20")
-  const syn = await SYN.deploy(owner.address)
+  const syn = await SYN.deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
   await syn.deployed()
   console.log('SyndicateERC20 deployed at', syn.address)
 
