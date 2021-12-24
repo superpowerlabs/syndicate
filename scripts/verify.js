@@ -14,6 +14,8 @@ let owner = chainId === 1337
     : (new ethers.Wallet(envJson.kovan.privateKey)).address
 
 let cmd
+    const synAddress = deployed[chainId].SyndicateERC20
+    const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
 switch (what) {
 
   case 'ssyn':
@@ -30,10 +32,8 @@ switch (what) {
     break
 
   case 'pool':
-    const synAddress = deployed[chainId].SyndicateERC20
-    const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
     synPerBlock = ethers.utils.parseEther(synPerBlock).toString()
-    const blockNumberFactoryConstructor = deployed.extras[chainId].blockNumberFactoryConstructor
+    const {blockNumberFactoryConstructor} = deployed.extras[chainId]
     const sumBlock = blockNumberFactoryConstructor + parseInt(blockMultiplier)
     cmd = `npx hardhat verify --show-stack-traces \\
       --network ${network} \\
@@ -46,22 +46,18 @@ switch (what) {
       ${sumBlock}`
     break
 
-  // case 'core':
-  //   const synAddress = deployed[chainId].SyndicateERC20
-  //   const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
-  //   synPerBlock = ethers.utils.parseEther(synPerBlock).toString()
-  //   const blockNumberFactoryConstructor = deployed.extras[chainId].blockNumberFactoryConstructor
-  //   const sumBlock = blockNumberFactoryConstructor + parseInt(blockMultiplier)
-  //   cmd = `npx hardhat verify --show-stack-traces \\
-  //     --network ${network} \\
-  //     ${deployed[chainId][what]} \\
-  //     ${synAddress} \\
-  //     ${ssynAddress} \\
-  //     ${synPerBlock} \\
-  //     ${blockPerUpdate} \\
-  //     ${blockNumberFactoryConstructor} \\
-  //     ${sumBlock}`
-  //   break
+  case 'core':
+    const {blockNumberPoolCreation} = deployed.extras[chainId]
+    cmd = `npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${deployed[chainId].SyndicateCorePool} \\
+      ${synAddress} \\
+      ${ssynAddress} \\
+      ${deployed[chainId].SyndicatePoolFactory} \\
+      ${synAddress} \\
+      ${blockNumberPoolCreation} \\
+      1`
+    break
 }
 
 

@@ -97,8 +97,19 @@ contract SyndicateERC20 is AccessControl {
   uint8 public constant decimals = 18;
 
   /**
-   * @notice Total supply of the token: initially 7,000,000,
-   *      with the potential to grow up to 10,000,000 during yield farming period (3 years)
+   * @notice Max total supply of the token: initially 70% of that max,
+   *      with the potential to grow up to the max during yield farming period (3 years)
+   *
+   * @dev ERC20 `function totalSupply() public view returns (uint256)`
+   *
+   * @dev Field is declared public: getter totalSupply() is created when compiled,
+   *      it returns the amount of tokens in existence.
+   */
+  uint256 public maxTotalSupply; // is set up in the constructor
+
+  /**
+   * @notice Total supply of the token: initially 70% of maxTotalSupply
+   *      with the potential to grow up maxTotalSupply during yield farming period (3 years)
    *
    * @dev ERC20 `function totalSupply() public view returns (uint256)`
    *
@@ -394,13 +405,16 @@ contract SyndicateERC20 is AccessControl {
    *      assigns initial token supply to the address specified
    *
    * @param _initialHolder owner of the initial token supply
+   * @param _maxTotalSupply max token supply without decimals
    */
-  constructor(address _initialHolder) {
+  constructor(address _initialHolder, uint256 _maxTotalSupply) {
     // verify initial holder address non-zero (is set)
     require(_initialHolder != address(0), "_initialHolder not set (zero address)");
+    require(_maxTotalSupply >= 10e9, "_maxTotalSupply less than minimum accepted amount");
 
+    maxTotalSupply = _maxTotalSupply * 10**18;
     // mint initial supply
-    mint(_initialHolder, 700_000_000e18);
+    mint(_initialHolder, (maxTotalSupply * 70) / 100);
   }
 
   // ===== Start: ERC20/ERC223/ERC777 functions =====
@@ -800,10 +814,11 @@ contract SyndicateERC20 is AccessControl {
     // this check automatically secures arithmetic overflow on the individual balance
     require(totalSupply + _value > totalSupply, "zero value mint or arithmetic overflow");
 
-    require(totalSupply + _value <= 1_000_000_000_000e18, "reached total max supply");
-
     // uint192 overflow check (required by voting delegation)
     require(totalSupply + _value <= type(uint192).max, "total supply overflow (uint192)");
+
+    // require(totalSupply + _value <= 1_000_000_000_000e18, "reached total max supply");
+    require(totalSupply + _value <= maxTotalSupply, "reached total max supply");
 
     // perform mint:
     // increase total amount of tokens value

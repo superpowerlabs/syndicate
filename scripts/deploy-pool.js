@@ -56,7 +56,7 @@ async function main() {
   const ssyn = await SSYN.attach(deployed[chainId].EscrowedSyndicateERC20)
 
   await ssyn.connect(owner).updateRole(corePool.address, await syn.ROLE_TOKEN_CREATOR()); // 9
-  console.log('Pool authorized to manage CRED')
+  console.log('Pool authorized to manage sSYN')
 
   await deployUtils.saveDeployed(chainId,
       ['SyndicatePoolFactory', 'SyndicateCorePool'],
