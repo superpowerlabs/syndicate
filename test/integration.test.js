@@ -15,6 +15,8 @@ describe("Integration Test", function () {
   }
 
   it("should verify that the entire process works", async function () {
+
+    const maxTotalSupply = 10000000000; // 10 billions
     console.log("block", await ethers.provider.getBlockNumber());
     let [owner, user1, user2, user3] = await ethers.getSigners();
     const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20");
@@ -22,7 +24,7 @@ describe("Integration Test", function () {
     console.log("block", await ethers.provider.getBlockNumber());
     console.log("ssyn", ssyn.address);
     const SYN = await ethers.getContractFactory("SyndicateERC20");
-    const syn = await SYN.deploy(owner.address);
+    const syn = await SYN.deploy(owner.address, maxTotalSupply);
     console.log("block", await ethers.provider.getBlockNumber());
     console.log("syn", syn.address);
 
