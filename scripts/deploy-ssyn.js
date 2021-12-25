@@ -8,6 +8,7 @@ let deployUtils
 async function main() {
   deployUtils = new DeployUtils(ethers)
   const chainId = await deployUtils.currentChainId()
+  console.log('Deployment started')
   const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20")
   const ssyn = await SSYN.deploy()
   await ssyn.deployed()

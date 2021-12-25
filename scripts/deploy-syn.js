@@ -14,6 +14,7 @@ async function main() {
     throw new Error('Missing parameters')
   }
 
+  console.log('Deployment started')
   const SYN = await ethers.getContractFactory("SyndicateERC20")
   const syn = await SYN.deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
   await syn.deployed()

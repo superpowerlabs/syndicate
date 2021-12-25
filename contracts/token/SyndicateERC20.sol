@@ -67,7 +67,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Field is declared public: getter name() is created when compiled,
    *      it returns the name of the token.
    */
-  string public constant name = "Syndicate";
+  string public constant name = "Syndicate Token";
 
   /**
    * @notice Symbol of the token: SYN
