@@ -28,7 +28,8 @@ switch (what) {
     cmd = `npx hardhat verify --show-stack-traces \\
       --network ${network} \\
       ${deployed[chainId].SyndicateERC20} \\
-      ${owner}`
+      ${owner} \\
+      ${synPerBlock}` // here it is the maxTotalSupply
     break
 
   case 'pool':
