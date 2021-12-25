@@ -817,7 +817,6 @@ contract SyndicateERC20 is AccessControl {
     // uint192 overflow check (required by voting delegation)
     require(totalSupply + _value <= type(uint192).max, "total supply overflow (uint192)");
 
-    // require(totalSupply + _value <= 1_000_000_000_000e18, "reached total max supply");
     require(totalSupply + _value <= maxTotalSupply, "reached total max supply");
 
     // perform mint:
