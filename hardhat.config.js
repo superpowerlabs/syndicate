@@ -1,6 +1,9 @@
 require('dotenv').config()
 require("@nomiclabs/hardhat-waffle");
+// https://moralis.io/how-to-verify-a-smart-contract-with-hardhat/
+require("@nomiclabs/hardhat-etherscan");
 require('hardhat-contract-sizer')
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -49,6 +52,9 @@ module.exports = {
       url: "https://eth-kovan.alchemyapi.io/v2/0_etibac5ri0N2Sa8OOHsY86bP4F2lR3",
       accounts: ["0e49e617188e58dce6e5e6ba747a2c4a4ecc2a5d51cc386a6860eb18aff9386b"]
     },
+  },
+  etherscan:  {
+    apiKey: "888ZBM1VPBD12DUB2U41RR8XM9CF577QYY"
 
   }
 
