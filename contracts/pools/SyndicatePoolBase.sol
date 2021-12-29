@@ -182,7 +182,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     );
     // verify SyndicatePoolFactory instance supplied
     require(
-      _factory.FACTORY_UID() == 0xc5cfd88c6e4d7e5c8a03c255f03af23c0918d8e82cac196f57466af3fd4a5ec7,
+      _factory.FACTORY_UID() == 0xc5cfd88c6e4d7e5c8a03c0f0f03af23c0918d8e82cac196f57466af3fd4a5ec7,
       "unexpected FACTORY_UID"
     );
 

@@ -28,7 +28,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant FACTORY_UID = 0xc5cfd88c6e4d7e5c8a03c255f03af23c0918d8e82cac196f57466af3fd4a5ec7;
+  uint256 public constant FACTORY_UID = 0xc5cfd88c6e4d7e5c8a03c0f0f03af23c0918d8e82cac196f57466af3fd4a5ec7;
 
   /// @dev Auxiliary data structure used only in getPoolData() view function
   struct PoolData {

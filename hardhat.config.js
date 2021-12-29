@@ -1,11 +1,12 @@
 require('dotenv').config()
 require("@nomiclabs/hardhat-waffle");
-// https://moralis.io/how-to-verify-a-smart-contract-with-hardhat/
-require("@nomiclabs/hardhat-etherscan");
 require('hardhat-contract-sizer')
-
+require("@nomiclabs/hardhat-etherscan");
+const {requirePath} = require('require-or-mock')
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
+
+const envJson = require(requirePath('.env.json'))
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -24,10 +25,10 @@ module.exports = {
 
   },
   networks: {
-     hardhat: {
-       chainId: 1337,
-       allowUnlimitedContractSize: true,
-    },
+    //  hardhat: {
+    //    chainId: 1337,
+    //    allowUnlimitedContractSize: true,
+    // },
     localhost: {
       url: "http://localhost:8545",
       chainId: 1337,
@@ -42,21 +43,14 @@ module.exports = {
       accounts: [process.env.OWNER_PRIVATE_KEY],
       chainId: 3,
     },
-    rinkeby: {
-      chainId: 4,
-      url: "https://eth-rinkeby.alchemyapi.io/v2/OC_Q9f7-ukgGzRh82eOQxyesQgAHJ6vS",
-      accounts: ["0e49e617188e58dce6e5e6ba747a2c4a4ecc2a5d51cc386a6860eb18aff9386b"]
-    },
     kovan: {
+      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
+      accounts: [envJson.kovan.privateKey],
       chainId: 42,
-      url: "https://eth-kovan.alchemyapi.io/v2/0_etibac5ri0N2Sa8OOHsY86bP4F2lR3",
-      accounts: ["0e49e617188e58dce6e5e6ba747a2c4a4ecc2a5d51cc386a6860eb18aff9386b"]
     },
   },
-  etherscan:  {
-    apiKey: "888ZBM1VPBD12DUB2U41RR8XM9CF577QYY"
-
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_KEY
   }
-
 };
 

@@ -16,9 +16,9 @@ import "./ERC20Receiver.sol";
  *      - Symbol: SYN
  *      - Name: Syndicate
  *      - Decimals: 18
- *      - Initial token supply: 7,000,000 SYN
- *      - Maximum final token supply: 10,000,000 SYN
- *          - Up to 3,000,000 SYN may get minted in 3 years period via yield farming
+ *      - Initial token supply: 700,000,000 SYN
+ *      - Maximum final token supply: 1,000,000,000 SYN
+ *          - Up to 300,000,000 SYN may get minted in 3 years period via yield farming
  *      - Mintable: total supply may increase
  *      - Burnable: total supply may decrease
  *
@@ -67,7 +67,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Field is declared public: getter name() is created when compiled,
    *      it returns the name of the token.
    */
-  string public constant name = "Syndicate";
+  string public constant name = "Syndicate Token";
 
   /**
    * @notice Symbol of the token: SYN
@@ -97,15 +97,26 @@ contract SyndicateERC20 is AccessControl {
   uint8 public constant decimals = 18;
 
   /**
-   * @notice Total supply of the token: initially 7,000,000,
-   *      with the potential to grow up to 10,000,000 during yield farming period (3 years)
+   * @notice Max total supply of the token: initially 70% of that max,
+   *      with the potential to grow up to the max during yield farming period (3 years)
    *
    * @dev ERC20 `function totalSupply() public view returns (uint256)`
    *
    * @dev Field is declared public: getter totalSupply() is created when compiled,
    *      it returns the amount of tokens in existence.
    */
-  uint256 public totalSupply; // is set to 7 million * 10^18 in the constructor
+  uint256 public maxTotalSupply; // is set up in the constructor
+
+  /**
+   * @notice Total supply of the token: initially 70% of maxTotalSupply
+   *      with the potential to grow up maxTotalSupply during yield farming period (3 years)
+   *
+   * @dev ERC20 `function totalSupply() public view returns (uint256)`
+   *
+   * @dev Field is declared public: getter totalSupply() is created when compiled,
+   *      it returns the amount of tokens in existence.
+   */
+  uint256 public totalSupply; // is set to 700 million * 10^18 in the constructor
 
   /**
    * @dev A record of all the token balances
@@ -134,7 +145,6 @@ contract SyndicateERC20 is AccessControl {
      *      that block voting power value is in effect
      */
     uint64 blockNumber;
-
     /*
      * @dev cumulative voting power a delegate has obtained starting
      *      from the block stored in blockNumber
@@ -395,13 +405,16 @@ contract SyndicateERC20 is AccessControl {
    *      assigns initial token supply to the address specified
    *
    * @param _initialHolder owner of the initial token supply
+   * @param _maxTotalSupply max token supply without decimals
    */
-  constructor(address _initialHolder) {
+  constructor(address _initialHolder, uint256 _maxTotalSupply) {
     // verify initial holder address non-zero (is set)
     require(_initialHolder != address(0), "_initialHolder not set (zero address)");
+    require(_maxTotalSupply >= 10e9, "_maxTotalSupply less than minimum accepted amount");
 
+    maxTotalSupply = _maxTotalSupply * 10**18;
     // mint initial supply
-    mint(_initialHolder, 7_000_000e18);
+    mint(_initialHolder, (maxTotalSupply * 70) / 100);
   }
 
   // ===== Start: ERC20/ERC223/ERC777 functions =====
@@ -471,16 +484,21 @@ contract SyndicateERC20 is AccessControl {
    *      be greater than zero
    * @return success true on success, throws otherwise
    */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public returns (bool success) {
     // depending on `FEATURE_UNSAFE_TRANSFERS` we execute either safe (default)
     // or unsafe transfer
     // if `FEATURE_UNSAFE_TRANSFERS` is enabled
     // or receiver has `ROLE_ERC20_RECEIVER` permission
     // or sender has `ROLE_ERC20_SENDER` permission
-    if(isFeatureEnabled(FEATURE_UNSAFE_TRANSFERS)
-      || isOperatorInRole(_to, ROLE_ERC20_RECEIVER)
-      || isSenderInRole(ROLE_ERC20_SENDER)) {
+    if (
+      isFeatureEnabled(FEATURE_UNSAFE_TRANSFERS) ||
+      isOperatorInRole(_to, ROLE_ERC20_RECEIVER) ||
+      isSenderInRole(ROLE_ERC20_SENDER)
+    ) {
       // we execute unsafe transfer - delegate call to `unsafeTransferFrom`,
       // `FEATURE_TRANSFERS` is verified inside it
       unsafeTransferFrom(_from, _to, _value);
@@ -526,7 +544,12 @@ contract SyndicateERC20 is AccessControl {
    * @param _data [optional] additional data with no specified format,
    *      sent in onERC20Received call to `_to` in case if its a smart contract
    */
-  function safeTransferFrom(address _from, address _to, uint256 _value, bytes memory _data) public {
+  function safeTransferFrom(
+    address _from,
+    address _to,
+    uint256 _value,
+    bytes memory _data
+  ) public {
     // first delegate call to `unsafeTransferFrom`
     // to perform the unsafe token(s) transfer
     unsafeTransferFrom(_from, _to, _value);
@@ -535,7 +558,7 @@ contract SyndicateERC20 is AccessControl {
     // ERC20Receiver and execute a callback handler `onERC20Received`,
     // reverting whole transaction on any error:
     // check if receiver `_to` supports ERC20Receiver interface
-    if(AddressUtils.isContract(_to)) {
+    if (AddressUtils.isContract(_to)) {
       // if `_to` is a contract - execute onERC20Received
       bytes4 response = ERC20Receiver(_to).onERC20Received(msg.sender, _from, _value, _data);
 
@@ -570,13 +593,18 @@ contract SyndicateERC20 is AccessControl {
    * @param _value amount of tokens to be transferred, must
    *      be greater than zero
    */
-  function unsafeTransferFrom(address _from, address _to, uint256 _value) public {
+  function unsafeTransferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
-    require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-         || _from != msg.sender && (isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isSenderInRole(ROLE_WHITE_LISTED_SPENDER)),
-            _from == msg.sender? "transfers are disabled": "transfers on behalf are disabled");
-
+    require(
+      (_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)) ||
+        (_from != msg.sender && (isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isSenderInRole(ROLE_WHITE_LISTED_SPENDER))),
+      _from == msg.sender ? "transfers are disabled" : "transfers on behalf are disabled"
+    );
     // non-zero source address check - Zeppelin
     // obviously, zero source address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
@@ -594,7 +622,7 @@ contract SyndicateERC20 is AccessControl {
 
     // according to ERC-20 Token Standard, https://eips.ethereum.org/EIPS/eip-20
     // "Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event."
-    if(_value == 0) {
+    if (_value == 0) {
       // emit an ERC20 transfer event
       emit Transfer(_from, _to, _value);
 
@@ -605,7 +633,7 @@ contract SyndicateERC20 is AccessControl {
     // no need to make arithmetic overflow check on the _value - by design of mint()
 
     // in case of transfer on behalf
-    if(_from != msg.sender) {
+    if (_from != msg.sender) {
       // read allowance value - the amount of tokens allowed to transfer - into the stack
       uint256 _allowance = transferAllowances[_from][msg.sender];
 
@@ -666,7 +694,10 @@ contract SyndicateERC20 is AccessControl {
     require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
 
     // if transfer on behave is not allowed, then approve is also not allowed, unless it's white listed
-    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER), "SYN: spender not allowed");
+    require(
+      isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER),
+      "SYN: spender not allowed"
+    );
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
     uint256 _oldValue = transferAllowances[msg.sender][_spender];
@@ -786,6 +817,8 @@ contract SyndicateERC20 is AccessControl {
     // uint192 overflow check (required by voting delegation)
     require(totalSupply + _value <= type(uint192).max, "total supply overflow (uint192)");
 
+    require(totalSupply + _value <= maxTotalSupply, "reached total max supply");
+
     // perform mint:
     // increase total amount of tokens value
     totalSupply += _value;
@@ -820,15 +853,17 @@ contract SyndicateERC20 is AccessControl {
   function burn(address _from, uint256 _value) public {
     // check if caller has sufficient permissions to burn tokens
     // and if not - check for possibility to burn own tokens or to burn on behalf
-    if(!isSenderInRole(ROLE_TOKEN_DESTROYER)) {
+    if (!isSenderInRole(ROLE_TOKEN_DESTROYER)) {
       // if `_from` is equal to sender, require own burns feature to be enabled
       // otherwise require burns on behalf feature to be enabled
-      require(_from == msg.sender && isFeatureEnabled(FEATURE_OWN_BURNS)
-           || _from != msg.sender && isFeatureEnabled(FEATURE_BURNS_ON_BEHALF),
-              _from == msg.sender? "burns are disabled": "burns on behalf are disabled");
+      require(
+        (_from == msg.sender && isFeatureEnabled(FEATURE_OWN_BURNS)) ||
+          (_from != msg.sender && isFeatureEnabled(FEATURE_BURNS_ON_BEHALF)),
+        _from == msg.sender ? "burns are disabled" : "burns on behalf are disabled"
+      );
 
       // in case of burn on behalf
-      if(_from != msg.sender) {
+      if (_from != msg.sender) {
         // read allowance value - the amount of tokens allowed to be burnt - into the stack
         uint256 _allowance = transferAllowances[_from][msg.sender];
 
@@ -898,7 +933,7 @@ contract SyndicateERC20 is AccessControl {
     VotingPowerRecord[] storage history = votingPowerHistory[_of];
 
     // lookup the history and return latest element
-    return history.length == 0? 0: history[history.length - 1].votingPower;
+    return history.length == 0 ? 0 : history[history.length - 1].votingPower;
   }
 
   /**
@@ -917,21 +952,21 @@ contract SyndicateERC20 is AccessControl {
     VotingPowerRecord[] storage history = votingPowerHistory[_of];
 
     // if voting power history for the account provided is empty
-    if(history.length == 0) {
+    if (history.length == 0) {
       // than voting power is zero - return the result
       return 0;
     }
 
     // check latest voting power history record block number:
     // if history was not updated after the block of interest
-    if(history[history.length - 1].blockNumber <= _blockNum) {
+    if (history[history.length - 1].blockNumber <= _blockNum) {
       // we're done - return last voting power record
       return getVotingPower(_of);
     }
 
     // check first voting power history record block number:
     // if history was never updated before the block of interest
-    if(history[0].blockNumber > _blockNum) {
+    if (history[0].blockNumber > _blockNum) {
       // we're done - voting power at the block num of interest was zero
       return 0;
     }
@@ -950,7 +985,7 @@ contract SyndicateERC20 is AccessControl {
    * @param _of delegate to query voting power history for
    * @return voting power history array for the delegate of interest
    */
-  function getVotingPowerHistory(address _of) public view returns(VotingPowerRecord[] memory) {
+  function getVotingPowerHistory(address _of) public view returns (VotingPowerRecord[] memory) {
     // return an entire array as memory
     return votingPowerHistory[_of];
   }
@@ -962,7 +997,7 @@ contract SyndicateERC20 is AccessControl {
    * @param _of delegate to query voting power history length for
    * @return voting power history array length for the delegate of interest
    */
-  function getVotingPowerHistoryLength(address _of) public view returns(uint256) {
+  function getVotingPowerHistoryLength(address _of) public view returns (uint256) {
     // read array length and return
     return votingPowerHistory[_of].length;
   }
@@ -999,7 +1034,14 @@ contract SyndicateERC20 is AccessControl {
    * @param r half of the ECDSA signature pair
    * @param s half of the ECDSA signature pair
    */
-  function delegateWithSig(address _to, uint256 _nonce, uint256 _exp, uint8 v, bytes32 r, bytes32 s) public {
+  function delegateWithSig(
+    address _to,
+    uint256 _nonce,
+    uint256 _exp,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public {
     // verify delegations on behalf are enabled
     require(isFeatureEnabled(FEATURE_DELEGATIONS_ON_BEHALF), "delegations on behalf are disabled");
 
@@ -1061,15 +1103,19 @@ contract SyndicateERC20 is AccessControl {
    * @param _to delegate to move voting power to
    * @param _value voting power to move from `_from` to `_to`
    */
-  function __moveVotingPower(address _from, address _to, uint256 _value) private {
+  function __moveVotingPower(
+    address _from,
+    address _to,
+    uint256 _value
+  ) private {
     // if there is no move (`_from == _to`) or there is nothing to move (`_value == 0`)
-    if(_from == _to || _value == 0) {
+    if (_from == _to || _value == 0) {
       // return silently with no action
       return;
     }
 
     // if source address is not zero - decrease its voting power
-    if(_from != address(0)) {
+    if (_from != address(0)) {
       // read current source address voting power
       uint256 _fromVal = getVotingPower(_from);
 
@@ -1083,7 +1129,7 @@ contract SyndicateERC20 is AccessControl {
     }
 
     // if destination address is not zero - increase its voting power
-    if(_to != address(0)) {
+    if (_to != address(0)) {
       // read current destination address voting power
       uint256 _fromVal = getVotingPower(_to);
 
@@ -1105,12 +1151,16 @@ contract SyndicateERC20 is AccessControl {
    * @param _fromVal old voting power of the delegate
    * @param _toVal new voting power of the delegate
    */
-  function __updateVotingPower(address _of, uint256 _fromVal, uint256 _toVal) private {
+  function __updateVotingPower(
+    address _of,
+    uint256 _fromVal,
+    uint256 _toVal
+  ) private {
     // get a link to an array of voting power history records for an address specified
     VotingPowerRecord[] storage history = votingPowerHistory[_of];
 
     // if there is an existing voting power value stored for current block
-    if(history.length != 0 && history[history.length - 1].blockNumber == block.number) {
+    if (history.length != 0 && history[history.length - 1].blockNumber == block.number) {
       // update voting power which is already stored in the current block
       history[history.length - 1].votingPower = uint192(_toVal);
     }
@@ -1138,7 +1188,7 @@ contract SyndicateERC20 is AccessControl {
    * @return an index of the closest element in an array to the value
    *      of interest (not exceeding that value)
    */
-  function __binaryLookup(address _to, uint256 n) private view returns(uint256) {
+  function __binaryLookup(address _to, uint256 n) private view returns (uint256) {
     // get a link to an array of voting power history records for an address specified
     VotingPowerRecord[] storage history = votingPowerHistory[_to];
 
@@ -1150,7 +1200,7 @@ contract SyndicateERC20 is AccessControl {
 
     // the iteration process narrows down the bounds by
     // splitting the interval in a half oce per each iteration
-    while(j > i) {
+    while (j > i) {
       // get an index in the middle of the interval [i, j]
       uint256 k = j - (j - i) / 2;
 
@@ -1158,7 +1208,7 @@ contract SyndicateERC20 is AccessControl {
       VotingPowerRecord memory cp = history[k];
 
       // if we've got a strict equal - we're lucky and done
-      if(cp.blockNumber == n) {
+      if (cp.blockNumber == n) {
         // just return the result - index `k`
         return k;
       }
