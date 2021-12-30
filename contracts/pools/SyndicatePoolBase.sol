@@ -320,7 +320,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   ) external {
     // sync and call processRewards
     _sync();
-    _processRewards(msg.sender, useSSYN, false);
+    _processRewards(msg.sender, useSSYN, true);
     // delegate call to an internal function
     _updateStakeLock(msg.sender, depositId, lockedUntil);
   }
