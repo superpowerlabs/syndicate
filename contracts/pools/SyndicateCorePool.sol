@@ -235,12 +235,10 @@ contract SyndicateCorePool is SyndicatePoolBase {
 
     poolTokenReserve += _amount;
 
-    // distribute quick reward
-    if (quickReward > 0) {
-      if (uint64(now256()) < _lockedUntil) {
-        uint256 reward = ((_lockedUntil - now256()) * _amount * quickReward) / (10000 * 365 days);
-        mintSSyn(_staker, reward);
-      }
+    // distribute quick reward, additional checks on _lockedUntil is done in super._stake
+    if (quickReward > 0 && _lockedUntil > 0) {
+      uint256 reward = ((_lockedUntil - now256()) * _amount * quickReward) / (10000 * 365 days);
+      mintSSyn(_staker, reward);
     }
   }
 
