@@ -59,6 +59,12 @@ contract SyndicateCorePool is SyndicatePoolBase {
    */
   event VaultUpdated(address indexed _by, address _fromVal, address _toVal);
 
+  modifier onlyFactoryOwner() {
+    // verify function is executed by the factory owner
+    require(factory.owner() == msg.sender, "CorePool: access denied");
+    _;
+  }
+
   /**
    * @dev Creates/deploys an instance of the core pool
    *
@@ -100,9 +106,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    *  @param _quickReward the reward weight
    */
-  function setQuickReward(uint256 _quickReward) external {
-    // verify function is executed by the factory owner
-    require(factory.owner() == msg.sender, "access denied");
+  function setQuickReward(uint256 _quickReward) onlyFactoryOwner external {
     // the is a general limit, should not exceed 10x
     require(_quickReward < 100000, "parameter out of range");
     quickReward = _quickReward;
@@ -309,5 +313,10 @@ contract SyndicateCorePool is SyndicatePoolBase {
     _transferSyn(_staker, pendingVaultClaim);
 
     emit VaultRewardsClaimed(msg.sender, _staker, pendingVaultClaim);
+  }
+
+  function delegate(address receiver) onlyFactoryOwner external {
+    require(poolToken == syn, "CorePool: only syn pool can delegate");
+    SyndicateERC20(syn).delegate(receiver);
   }
 }
