@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "./SyndicateERC20.sol";
+import "../interfaces/IERC20.sol";
 import "../utils/Ownable.sol";
 
 contract Vesting is Ownable {
@@ -30,7 +30,7 @@ contract Vesting is Ownable {
     function claim(address _receiving, uint256 _amount) external {
         require(block.timestamp > startTime + vestingDays * 24 * 3600, "Vesting:Cliff not reached");
         require(grants[msg.sender] >= _amount, "Vesting:Not enough");
-        SyndicateERC20(syn).transfer(_receiving, _amount);
+        IERC20(syn).transfer(_receiving, _amount);
         grants[msg.sender] = grants[msg.sender] - _amount;
     }
 }
