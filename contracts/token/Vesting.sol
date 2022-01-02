@@ -13,11 +13,14 @@ contract Vesting is Ownable {
 
     constructor(address _syn, address[] memory _receivers, uint256[] memory _awards) {
         require(_awards.length == _receivers.length, "Vesting: length unmatch");
+        uint256 totalAward = 0;
         for (uint256 i = 0; i < _receivers.length; i++) {
             grants[_receivers[i]] = _awards[i];
+            totalAward = totalAward + _awards[i];
         }
         startTime = block.timestamp;
         syn = _syn;
+        IERC20(syn).transferFrom(msg.sender, address(this), totalAward);
         vestingDays = 365 + 31;
     }
 
