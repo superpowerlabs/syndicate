@@ -18,16 +18,17 @@ async function main() {
 
   const [owner] = await ethers.getSigners()
 
-  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, QUICK_REWARDS} = process.env
-  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !QUICK_REWARDS) {
+  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, QUICK_REWARDS, WEIGHT} = process.env
+  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !QUICK_REWARDS || !WEIGHT) {
     throw new Error('Missing parameters')
   }
+
 
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
   console.log('Deployment started')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
-  const blockNumberFactoryConstructor = await ethers.provider.getBlockNumber()
+  const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber() + 40)
   const poolFactory = await PoolFactory.deploy(
       synAddress,
       ssynAddress,
@@ -40,7 +41,7 @@ async function main() {
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
 
   const blockNumberPoolCreation = await ethers.provider.getBlockNumber()
-  const tx = await poolFactory.connect(owner).createPool(synAddress, blockNumberPoolCreation, 1)
+  const tx = await poolFactory.connect(owner).createPool(synAddress, blockNumberPoolCreation, WEIGHT)
   await tx.wait()
 
   const synPoolAddress = await poolFactory.getPoolAddress(synAddress)
