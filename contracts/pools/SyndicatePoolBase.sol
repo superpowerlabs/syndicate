@@ -26,8 +26,8 @@ import "../token/EscrowedSyndicateERC20.sol";
  * @dev The weight is logically 10% for SYN pool and 90% for SYN/ETH pool.
  *      Since Solidity doesn't support fractions the weight is defined by the division of
  *      pool weight by total pools weight (sum of all registered pools within the factory)
- * @dev For SYN Pool we use 100 as weight and for SYN/ETH pool - 900.
  *
+ * @author Pedro Bergamini, reviewed by Basil Gorin
  */
 abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Data structure representing token holder using a pool
@@ -43,6 +43,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // @dev An array of holder's deposits
     Deposit[] deposits;
   }
+
+  uint256 public minLockTime = 26 weeks;
 
   /// @dev Token holder storage, maps token holder address to their data record
   mapping(address => User) public users;

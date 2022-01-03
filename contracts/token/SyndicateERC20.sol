@@ -47,6 +47,7 @@ import "./ERC20Receiver.sol";
  *      See: https://ieeexplore.ieee.org/document/8802438
  *      See: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
  *
+ * @author Basil Gorin
  */
 contract SyndicateERC20 is AccessControl {
   /**
