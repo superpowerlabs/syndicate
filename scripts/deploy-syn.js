@@ -7,7 +7,7 @@ const {expect} = require('chai');
 let deployUtils
 
 const grantees = [
-    '0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B',
+  '0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B',
   '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3',
   '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64'
 ]
@@ -51,15 +51,15 @@ async function main() {
   const grants = []
   const maxSupply = ethers.BigNumber.from(normalize(process.env.MAX_TOTAL_SUPPLY))
 
-  for (let i=0;i<grantPoints.length; i++) {
-    grants[i] = maxSupply.div(10000).mul(grantPoints[i])
+  for (let i = 0; i < grantPoints.length; i++) {
+    grants[i] = maxSupply.div(10000).mul(grantPoints[i]).mul(36).div(100)
   }
 
   const totalRewards = grants.reduce((a, b) => {
     return a.add(b)
-  } , ethers.BigNumber.from('0'))
+  }, ethers.BigNumber.from('0'))
 
-  await(await syn.connect(owner).transfer(vesting.address, totalRewards)).wait()
+  await (await syn.connect(owner).transfer(vesting.address, totalRewards)).wait()
 
   await (await vesting.init(grantees, grants)).wait()
   await deployUtils.saveDeployed(chainId, ['SyndicateERC20', 'Vesting'], [syn.address, vesting.address])

@@ -8,8 +8,6 @@ import "hardhat/console.sol";
 
 contract TeamVesting is Ownable {
 
-  event GrantTerminated(address grantee, uint when);
-
   uint256 public startTime;
   uint256 public cliff;
   address public syn;
@@ -17,7 +15,6 @@ contract TeamVesting is Ownable {
   struct Grant {
     uint120 amount;
     uint120 claimed;
-    uint terminatedAt;
   }
 
   mapping(address => Grant) public grants;
@@ -39,7 +36,7 @@ contract TeamVesting is Ownable {
     uint256 totalGrants = 0;
     for (uint256 i = 0; i < _grantees.length; i++) {
       require(_grantees[i] != address(0), "TeamVesting: grantee cannot be 0x0");
-      grants[_grantees[i]] = Grant(_amounts[i], 0, 0);
+      grants[_grantees[i]] = Grant(_amounts[i], 0);
       grantees.push(_grantees[i]);
       totalGrants += _amounts[i];
     }
@@ -63,12 +60,6 @@ contract TeamVesting is Ownable {
     SyndicateERC20(syn).transfer(recipient, _amount);
   }
 
-  function terminate(address grantee, uint when) external onlyOwner isGrantee(grantee) {
-    require(when == 0 || when > block.timestamp, "TeamVesting: invalid termination timestamp");
-    grants[grantee].terminatedAt = when == 0 ? block.timestamp : when;
-    emit GrantTerminated(grantee, when);
-  }
-
   function vestedAmount(address grantee) public view isGrantee(grantee) returns (uint120) {
     uint120 res = 0;
     if (startTime == 0) {
@@ -77,23 +68,20 @@ contract TeamVesting is Ownable {
     // diff in days
     uint256 diff = (block.timestamp - startTime) / 1 days;
     if (diff < cliff) {
-      return res;
+      return 0;
     } else {
-      res = (grants[grantee].amount * 36) / 100;
-    }
-    if (grants[grantee].terminatedAt != 0) {
-      uint maxDiff = (grants[grantee].terminatedAt - startTime) / 1 days;
-      if (diff > maxDiff) {
-        diff = maxDiff;
-      }
-    }
-    uint256 percentageByMonthAfterCliff = uint256(100 - 36) / 23;
-    uint256 vestedMonths = (diff - cliff) / 30;
-    //    console.log(vestedMonths);
-    if (vestedMonths > 22) {
       return grants[grantee].amount;
-    } else {
-      return res + uint120(grants[grantee].amount * vestedMonths * percentageByMonthAfterCliff / 100);
     }
   }
+
+  function getLostRewards() external onlyOwner {
+    require(block.timestamp > startTime + 670 days, "TeamVesting: too early to recover lost rewards");
+    uint256 amount;
+    for (uint256 i = 0; i < grantees.length; i++) {
+      amount += uint256(grants[msg.sender].amount - grants[msg.sender].claimed);
+      grants[msg.sender].claimed = grants[msg.sender].amount;
+    }
+    SyndicateERC20(syn).transfer(owner(), amount);
+  }
+
 }

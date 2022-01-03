@@ -19,8 +19,6 @@ contract InvestorVesting is Ownable {
     uint8 secondWeek;
     uint8 thirdWeek;
     uint8 fourthWeek;
-    uint8 cliff;
-    uint8 remainingMonths;
   }
 
   mapping(uint8 => VestingSchedule) public vestingSchedules;
@@ -36,45 +34,13 @@ contract InvestorVesting is Ownable {
   constructor(address _syn) {
     syn = _syn;
     // seed
-    vestingSchedules[1] = VestingSchedule({
-      tge: 1,
-      firstWeek: 2,
-      secondWeek: 3,
-      thirdWeek: 4,
-      fourthWeek: 5,
-      cliff: 12,
-      remainingMonths: 36
-    });
+    vestingSchedules[1] = VestingSchedule({tge: 1, firstWeek: 2, secondWeek: 3, thirdWeek: 4, fourthWeek: 5});
     // strategic
-    vestingSchedules[2] = VestingSchedule({
-      tge: 1,
-      firstWeek: 2,
-      secondWeek: 3,
-      thirdWeek: 5,
-      fourthWeek: 7,
-      cliff: 12,
-      remainingMonths: 36
-    });
+    vestingSchedules[2] = VestingSchedule({tge: 1, firstWeek: 2, secondWeek: 3, thirdWeek: 5, fourthWeek: 7});
     //
-    vestingSchedules[3] = VestingSchedule({
-      tge: 2,
-      firstWeek: 2,
-      secondWeek: 2,
-      thirdWeek: 2,
-      fourthWeek: 2,
-      cliff: 10,
-      remainingMonths: 36
-    });
+    vestingSchedules[3] = VestingSchedule({tge: 2, firstWeek: 2, secondWeek: 2, thirdWeek: 2, fourthWeek: 2});
     //
-    vestingSchedules[4] = VestingSchedule({
-      tge: 2,
-      firstWeek: 4,
-      secondWeek: 6,
-      thirdWeek: 9,
-      fourthWeek: 12,
-      cliff: 9,
-      remainingMonths: 36
-    });
+    vestingSchedules[4] = VestingSchedule({tge: 2, firstWeek: 4, secondWeek: 6, thirdWeek: 9, fourthWeek: 12});
   }
 
   function triggerTGE(uint256 _tgeTimestamp) external onlyOwner {
@@ -115,7 +81,10 @@ contract InvestorVesting is Ownable {
       uint256(investments[msg.sender].amount - investments[msg.sender].claimed) >= _amount,
       "InvestorVesting: not enough granted tokens"
     );
-    require(uint256(vestedAmount(msg.sender) - investments[msg.sender].claimed) >= _amount, "InvestorVesting: not enough vested tokens");
+    require(
+      uint256(vestedAmount(msg.sender) - investments[msg.sender].claimed) >= _amount,
+      "InvestorVesting: not enough vested tokens"
+    );
     investments[msg.sender].claimed += uint120(_amount);
     SyndicateERC20(syn).transfer(recipient, _amount);
   }
@@ -127,24 +96,17 @@ contract InvestorVesting is Ownable {
     }
     uint256 diff = block.timestamp - timestampTGE;
     VestingSchedule memory schedule = vestingSchedules[investments[investor].tier];
+    uint120 total = uint120(schedule.fourthWeek);
     if (diff < 1 weeks) {
-      return (investments[investor].amount * uint120(schedule.tge)) / 100;
+      return (investments[investor].amount * uint120(schedule.tge)) / total;
+    } else if (diff < 2 weeks) {
+      return (investments[investor].amount * uint120(schedule.firstWeek)) / total;
+    } else if (diff < 3 weeks) {
+      return (investments[investor].amount * uint120(schedule.secondWeek)) / total;
+    } else if (diff < 4 weeks) {
+      return (investments[investor].amount * uint120(schedule.thirdWeek)) / total;
+    } else {
+      return investments[investor].amount;
     }
-    if (diff < 2 weeks) {
-      return (investments[investor].amount * uint120(schedule.firstWeek)) / 100;
-    }
-    if (diff < 3 weeks) {
-      return (investments[investor].amount * uint120(schedule.secondWeek)) / 100;
-    }
-    if (diff < 4 weeks) {
-      return (investments[investor].amount * uint120(schedule.thirdWeek)) / 100;
-    }
-    uint120 res = investments[investor].amount * uint120(schedule.fourthWeek) / 100;
-    uint256 cliffTime = 4 weeks + (30 days * uint256(schedule.cliff));
-    if (diff < cliffTime) {
-      return res;
-    }
-    uint256 percentageByMonthAfterCliff = uint256(100 - schedule.fourthWeek) / uint256(schedule.remainingMonths);
-    return res + uint120((investments[investor].amount * percentageByMonthAfterCliff * (diff - cliffTime)) / 3000 days);
   }
 }
