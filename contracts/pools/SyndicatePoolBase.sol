@@ -417,7 +417,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // validate the inputs
     require(_amount > 0, "SyndicatePoolBase: zero amount");
     // we need to the limit of max locking time to limit the yield bonus
-    require(_lockUntil == 0 || (_lockUntil > now256() && _lockUntil - now256() <= 365 days), "SyndicatePoolBase: invalid lock interval");
+    require(
+      _lockUntil == 0 || (_lockUntil > now256() && _lockUntil - now256() <= 365 days),
+      "SyndicatePoolBase: invalid lock interval"
+    );
     // update smart contract state
     _sync();
 

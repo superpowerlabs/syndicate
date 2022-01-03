@@ -106,7 +106,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    *  @param _quickReward the reward weight
    */
-  function setQuickReward(uint256 _quickReward) onlyFactoryOwner external {
+  function setQuickReward(uint256 _quickReward) external onlyFactoryOwner {
     // the is a general limit, should not exceed 10x
     require(_quickReward < 100000, "parameter out of range");
     quickReward = _quickReward;
@@ -313,7 +313,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
     emit VaultRewardsClaimed(msg.sender, _staker, pendingVaultClaim);
   }
 
-  function delegate(address receiver) onlyFactoryOwner external {
+  function delegate(address receiver) external onlyFactoryOwner {
     require(poolToken == syn, "CorePool: only syn pool can delegate");
     SyndicateERC20(syn).delegate(receiver);
   }
