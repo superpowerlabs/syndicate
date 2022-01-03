@@ -4,6 +4,8 @@ pragma solidity 0.8.1;
 import "./SyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
+//import "hardhat/console.sol";
+
 contract Vesting is Ownable {
   uint256 public startTime;
   uint256 public vestingDays;
@@ -14,7 +16,7 @@ contract Vesting is Ownable {
   constructor(address _syn, uint256 _vestingDays) {
     syn = _syn;
     vestingDays = _vestingDays;
-    //365 + 31;
+    //    console.log(type(uint120).max);
   }
 
   function init(address[] memory _receivers, uint256[] memory _awards) external onlyOwner {
