@@ -14,7 +14,7 @@ describe("Vesting Test", function () {
     return '' + val + '0'.repeat(n)
   }
 
-  it("should verify that the entire process works", async function () {
+  it.only("should verify that the entire process works", async function () {
 
     const maxTotalSupply = 10000000000; // 10 billions
     let [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
@@ -29,10 +29,11 @@ describe("Vesting Test", function () {
     await syn.updateFeatures(features)
 
     const Vesting = await ethers.getContractFactory("Vesting");
-    const vesting = await Vesting.deploy(syn.address, [user1.address, user2.address, user3.address],
-    [normalize(1000000), normalize(1500000), normalize(500000)]);
-    syn.transfer(vesting.address, normalize(3000000));
+    const vesting = await Vesting.deploy(syn.address, 365 + 31)
+    await syn.connect(owner).transfer(vesting.address, normalize(3000000));
     await expect((await syn.balanceOf(vesting.address))/1e18).equal(3000000);
+    await vesting.init([user1.address, user2.address, user3.address],
+        [normalize(1000000), normalize(1500000), normalize(500000)])
     await expect(vesting.connect(user1).claim(user4.address, normalize(500000))).revertedWith("Vesting:Cliff not reached");;
 
     // accelerate
