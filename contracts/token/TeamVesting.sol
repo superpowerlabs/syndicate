@@ -7,6 +7,9 @@ import "../utils/Ownable.sol";
 import "hardhat/console.sol";
 
 contract TeamVesting is Ownable {
+
+  event GrantTerminated(address grantee, uint when);
+
   uint256 public startTime;
   uint256 public cliff;
   address public syn;
@@ -14,9 +17,16 @@ contract TeamVesting is Ownable {
   struct Grant {
     uint120 amount;
     uint120 claimed;
+    uint terminatedAt;
   }
 
   mapping(address => Grant) public grants;
+  address[] public grantees;
+
+  modifier isGrantee(address grantee) {
+    require(grants[grantee].amount > 0, "TeamVesting: not a team member");
+    _;
+  }
 
   constructor(address _syn, uint256 _cliff) {
     syn = _syn;
@@ -28,7 +38,9 @@ contract TeamVesting is Ownable {
     require(_amounts.length == _grantees.length, "TeamVesting: lengths do not match");
     uint256 totalGrants = 0;
     for (uint256 i = 0; i < _grantees.length; i++) {
-      grants[_grantees[i]] = Grant({amount: _amounts[i], claimed: 0});
+      require(_grantees[i] != address(0), "TeamVesting: grantee cannot be 0x0");
+      grants[_grantees[i]] = Grant(_amounts[i], 0, 0);
+      grantees.push(_grantees[i]);
       totalGrants += _amounts[i];
     }
     require(SyndicateERC20(syn).balanceOf(address(this)) >= totalGrants, "TeamVesting: fund missing");
@@ -40,9 +52,8 @@ contract TeamVesting is Ownable {
     cliff = _newCliff;
   }
 
-  function claim(address recipient, uint256 _amount) external {
+  function claim(address recipient, uint256 _amount) external isGrantee(msg.sender) {
     require(recipient != address(0), "TeamVesting: recipient cannot be 0x0");
-    require(grants[msg.sender].amount > 0, "TeamVesting: not a team member");
     require(
       uint256(grants[msg.sender].amount - grants[msg.sender].claimed) >= _amount,
       "TeamVesting: not enough granted tokens"
@@ -52,8 +63,13 @@ contract TeamVesting is Ownable {
     SyndicateERC20(syn).transfer(recipient, _amount);
   }
 
-  function vestedAmount(address grantee) public view returns (uint120) {
-    require(grants[grantee].amount > 0, "TeamVesting: not a team member");
+  function terminate(address grantee, uint when) external onlyOwner isGrantee(grantee) {
+    require(when == 0 || when > block.timestamp, "TeamVesting: invalid termination timestamp");
+    grants[grantee].terminatedAt = when == 0 ? block.timestamp : when;
+    emit GrantTerminated(grantee, when);
+  }
+
+  function vestedAmount(address grantee) public view isGrantee(grantee) returns (uint120) {
     uint120 res = 0;
     if (startTime == 0) {
       return res;
@@ -65,9 +81,15 @@ contract TeamVesting is Ownable {
     } else {
       res = (grants[grantee].amount * 36) / 100;
     }
+    if (grants[grantee].terminatedAt != 0) {
+      uint maxDiff = (grants[grantee].terminatedAt - startTime) / 1 days;
+      if (diff > maxDiff) {
+        diff = maxDiff;
+      }
+    }
     uint256 percentageByMonthAfterCliff = uint256(100 - 36) / 23;
     uint256 vestedMonths = (diff - cliff) / 30;
-//    console.log(vestedMonths);
+    //    console.log(vestedMonths);
     if (vestedMonths > 22) {
       return grants[grantee].amount;
     } else {
