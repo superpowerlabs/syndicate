@@ -7,7 +7,6 @@ import "../utils/Ownable.sol";
 import "hardhat/console.sol";
 
 contract TeamVesting is Ownable {
-
   uint256 public startTime;
   uint256 public cliff;
   address public syn;
@@ -83,5 +82,4 @@ contract TeamVesting is Ownable {
     }
     SyndicateERC20(syn).transfer(owner(), amount);
   }
-
 }

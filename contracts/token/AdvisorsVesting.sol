@@ -7,8 +7,7 @@ import "../utils/Ownable.sol";
 import "hardhat/console.sol";
 
 contract AdvisorsVesting is Ownable {
-
-  event GrantTerminated(address grantee, uint when);
+  event GrantTerminated(address grantee, uint256 when);
 
   uint256 public startTime;
   uint256 public cliff;
@@ -17,7 +16,7 @@ contract AdvisorsVesting is Ownable {
   struct Grant {
     uint120 amount;
     uint120 claimed;
-    uint terminatedAt;
+    uint256 terminatedAt;
   }
 
   mapping(address => Grant) public grants;
@@ -52,12 +51,15 @@ contract AdvisorsVesting is Ownable {
       uint256(grants[msg.sender].amount - grants[msg.sender].claimed) >= _amount,
       "AdvisorsVesting: not enough granted tokens"
     );
-    require(uint256(vestedAmount(msg.sender) - grants[msg.sender].claimed) >= _amount, "AdvisorsVesting: not enough vested tokens");
+    require(
+      uint256(vestedAmount(msg.sender) - grants[msg.sender].claimed) >= _amount,
+      "AdvisorsVesting: not enough vested tokens"
+    );
     grants[msg.sender].claimed += uint120(_amount);
     SyndicateERC20(syn).transfer(recipient, _amount);
   }
 
-  function terminate(address grantee, uint when) external onlyOwner isGrantee(grantee) {
+  function terminate(address grantee, uint256 when) external onlyOwner isGrantee(grantee) {
     require(when == 0 || when > block.timestamp, "AdvisorsVesting: invalid termination timestamp");
     grants[grantee].terminatedAt = when == 0 ? block.timestamp : when;
     emit GrantTerminated(grantee, when);
@@ -72,9 +74,9 @@ contract AdvisorsVesting is Ownable {
     if (diff < cliff) {
       return 0;
     } else if (grants[grantee].terminatedAt != 0) {
-      uint terminationDays = (grants[grantee].terminatedAt - startTime) / 1 days;
+      uint256 terminationDays = (grants[grantee].terminatedAt - startTime) / 1 days;
       if (terminationDays < diff) {
-        return uint120(grants[grantee].amount * terminationDays / cliff);
+        return uint120((grants[grantee].amount * terminationDays) / cliff);
       }
     }
     return grants[grantee].amount;

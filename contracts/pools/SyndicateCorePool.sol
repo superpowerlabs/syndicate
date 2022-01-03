@@ -16,6 +16,7 @@ import "./SyndicatePoolBase.sol";
  */
 contract SyndicateCorePool is SyndicatePoolBase {
   /// @dev Flag indicating pool type, false means "core pool"
+  // solhint-disable-next-line
   bool public constant override isFlashPool = false;
 
   /// @dev Control parameter of how much reward in sSYN user will get immediately upon staking.

@@ -22,6 +22,7 @@ contract SyndicateFlashPool is SyndicatePoolBase {
   uint64 public endBlock;
 
   /// @dev Flag indicating pool type, true means "flash pool"
+  // solhint-disable-next-line
   bool public constant override isFlashPool = true;
 
   /**
@@ -75,6 +76,7 @@ contract SyndicateFlashPool is SyndicatePoolBase {
   function _stake(
     address _staker,
     uint256 _amount,
+    // solhint-disable-next-line
     uint64 _lockedUntil,
     bool useSSYN,
     bool isYield

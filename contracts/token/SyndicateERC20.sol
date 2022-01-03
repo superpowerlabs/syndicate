@@ -68,6 +68,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Field is declared public: getter name() is created when compiled,
    *      it returns the name of the token.
    */
+  // solhint-disable-next-line
   string public constant name = "Syndicate Token";
 
   /**
@@ -80,6 +81,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Field is declared public: getter symbol() is created when compiled,
    *      it returns the symbol of the token
    */
+  // solhint-disable-next-line
   string public constant symbol = "SYN";
 
   /**
@@ -95,6 +97,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev NOTE: This information is only used for _display_ purposes: it in
    *      no way affects any of the arithmetic of the contract, including balanceOf() and transfer().
    */
+  // solhint-disable-next-line
   uint8 public constant decimals = 18;
 
   /**
@@ -297,6 +300,7 @@ contract SyndicateERC20 is AccessControl {
    * @dev Equal to `bytes4(keccak256("onERC20Received(address,address,uint256,bytes)"))`,
    *      which can be also obtained as `ERC20Receiver(address(0)).onERC20Received.selector`
    */
+  // solhint-disable-next-line
   bytes4 private constant ERC20_RECEIVED = 0x4fc35859;
 
   /**
