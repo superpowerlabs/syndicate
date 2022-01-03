@@ -52,7 +52,7 @@ async function main() {
   const maxSupply = ethers.BigNumber.from(normalize(process.env.MAX_TOTAL_SUPPLY))
 
   for (let i=0;i<grantPoints.length; i++) {
-    grants[i] = maxSupply.div(10000).mul(grantPoints[i])
+    grants[i] = maxSupply.div(10000).mul(grantPoints[i]).div(100).mul(36)
   }
 
   const totalRewards = grants.reduce((a, b) => {
