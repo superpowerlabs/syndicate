@@ -20,6 +20,7 @@ import "../utils/Ownable.sol";
  * @dev The factory requires ROLE_TOKEN_CREATOR permission on the SYN token to mint yield
  *      (see `mintYieldTo` function)
  *
+ * @author Pedro Bergamini, reviewed by Basil Gori
  */
 contract SyndicatePoolFactory is Ownable, SyndicateAware {
   /**

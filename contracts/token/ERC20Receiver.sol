@@ -10,7 +10,7 @@ pragma solidity 0.8.1;
  *
  * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  * @dev See https://github.com/ethereum/EIPs/issues/223
- *
+ * @author Basil Gorin
  */
 interface ERC20Receiver {
   /**

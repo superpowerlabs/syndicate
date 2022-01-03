@@ -9,7 +9,7 @@ pragma solidity 0.8.1;
  *
  * @notice Implementing smart contracts MUST verify that they get linked to real SyndicateERC20 instance
  *      and that syn() getter returns this very same instance address
- *
+ * @author Basil Gorin
  */
 interface ILinkedToSYN {
   /**

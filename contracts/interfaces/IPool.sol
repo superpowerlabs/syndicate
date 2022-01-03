@@ -8,6 +8,7 @@ import "./ILinkedToSYN.sol";
  *
  * @notice An abstraction representing a pool, see SyndicatePoolBase for details
  *
+ * @author Pedro Bergamini, reviewed by Basil Gorin
  */
 interface IPool is ILinkedToSYN {
   /**

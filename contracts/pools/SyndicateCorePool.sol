@@ -12,6 +12,7 @@ import "./SyndicatePoolBase.sol";
  *
  * @dev See SyndicatePoolBase for more details
  *
+ * @author Pedro Bergamini, reviewed by Basil Gorin
  */
 contract SyndicateCorePool is SyndicatePoolBase {
   /// @dev Flag indicating pool type, false means "core pool"
