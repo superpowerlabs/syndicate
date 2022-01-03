@@ -44,7 +44,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     Deposit[] deposits;
   }
 
-  uint256 public minLockTime = 26 weeks;
+  uint256 public minLockTime = 16 weeks;
 
   /// @dev Token holder storage, maps token holder address to their data record
   mapping(address => User) public users;
@@ -399,6 +399,11 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     return weightToReward(user.totalWeight, yieldRewardsPerWeight) - user.subYieldRewards;
   }
 
+  function setMinLockTime(uint256 _minLockTime) external {
+    require(_minLockTime < 365 days, "invalid minLockTime");
+    minLockTime = _minLockTime;
+  }
+
   /**
    * @dev Used internally, mostly by children implementations, see stake()
    *
@@ -420,7 +425,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     require(_amount > 0, "SyndicatePoolBase: zero amount");
     // we need to the limit of max locking time to limit the yield bonus
     require(
-      _lockUntil == 0 || (_lockUntil > now256() && _lockUntil - now256() <= 365 days),
+      _lockUntil >= now256() + minLockTime && _lockUntil - now256() <= 365 days,
       "SyndicatePoolBase: invalid lock interval"
     );
     // update smart contract state
