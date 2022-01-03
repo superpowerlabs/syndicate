@@ -108,7 +108,8 @@ contract InvestorVesting is Ownable {
     require(SyndicateERC20(syn).balanceOf(address(this)) >= _previouslyInvested, "Vesting: not enough tokens");
   }
 
-  function claim(uint256 _amount) external {
+  function claim(address recipient, uint256 _amount) external {
+    require(recipient != address(0), "InvestorVesting: recipient cannot be 0x0");
     require(investments[msg.sender].tier > 0, "InvestorVesting: not an investor");
     require(
       uint256(investments[msg.sender].amount - investments[msg.sender].claimed) >= _amount,
@@ -116,7 +117,7 @@ contract InvestorVesting is Ownable {
     );
     require(uint256(vestedAmount(msg.sender)) >= _amount, "InvestorVesting: not enough vested tokens");
     investments[msg.sender].claimed += uint120(_amount);
-    SyndicateERC20(syn).transfer(msg.sender, _amount);
+    SyndicateERC20(syn).transfer(recipient, _amount);
   }
 
   function vestedAmount(address investor) public view returns (uint120) {
