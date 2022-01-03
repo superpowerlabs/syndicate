@@ -10,7 +10,6 @@ contract Vesting is Ownable {
   address public syn;
 
   mapping(address => uint256) public grants;
-  address[] public grantees;
 
   constructor(address _syn, uint256 _vestingDays) {
     syn = _syn;
@@ -23,7 +22,6 @@ contract Vesting is Ownable {
     uint256 totalAward = 0;
     for (uint256 i = 0; i < _receivers.length; i++) {
       grants[_receivers[i]] = _awards[i];
-      grantees.push(_receivers[i]);
       totalAward = totalAward + _awards[i];
     }
     require(SyndicateERC20(syn).balanceOf(address(this)) >= totalAward, "Vesting: fund missing");
