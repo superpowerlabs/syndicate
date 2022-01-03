@@ -105,7 +105,7 @@ contract InvestorVesting is Ownable {
       } // else we just skip it. It can be an error
     }
     _previouslyInvested += totalInvestments;
-    require(SyndicateERC20(syn).balanceOf(address(this)) >= _previouslyInvested, "Vesting: not enough tokens");
+    require(SyndicateERC20(syn).balanceOf(address(this)) >= _previouslyInvested, "TeamVesting: not enough tokens");
   }
 
   function claim(address recipient, uint256 _amount) external {
@@ -115,7 +115,7 @@ contract InvestorVesting is Ownable {
       uint256(investments[msg.sender].amount - investments[msg.sender].claimed) >= _amount,
       "InvestorVesting: not enough granted tokens"
     );
-    require(uint256(vestedAmount(msg.sender)) >= _amount, "InvestorVesting: not enough vested tokens");
+    require(uint256(vestedAmount(msg.sender) - investments[msg.sender].claimed) >= _amount, "InvestorVesting: not enough vested tokens");
     investments[msg.sender].claimed += uint120(_amount);
     SyndicateERC20(syn).transfer(recipient, _amount);
   }
@@ -139,11 +139,12 @@ contract InvestorVesting is Ownable {
     if (diff < 4 weeks) {
       return (investments[investor].amount * uint120(schedule.thirdWeek)) / 100;
     }
-    if (diff < 4 weeks + (30 days * uint256(schedule.cliff))) {
-      return (investments[investor].amount * uint120(schedule.fourthWeek)) / 100;
+    uint120 res = investments[investor].amount * uint120(schedule.fourthWeek) / 100;
+    uint256 cliffTime = 4 weeks + (30 days * uint256(schedule.cliff));
+    if (diff < cliffTime) {
+      return res;
     }
     uint256 percentageByMonthAfterCliff = uint256(100 - schedule.fourthWeek) / uint256(schedule.remainingMonths);
-    uint256 vestedMonths = (4 weeks + (30 days * uint256(schedule.cliff)) - diff) / 30 days;
-    return uint120(vestedMonths * percentageByMonthAfterCliff);
+    return res + uint120((investments[investor].amount * percentageByMonthAfterCliff * (diff - cliffTime)) / 3000 days);
   }
 }
