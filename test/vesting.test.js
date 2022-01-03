@@ -14,7 +14,7 @@ describe("Vesting Test", function () {
     return '' + val + '0'.repeat(n)
   }
 
-  it.only("should verify that the entire process works", async function () {
+  it("should verify that the entire process works", async function () {
 
     const maxTotalSupply = 10000000000; // 10 billions
     let [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
@@ -34,7 +34,7 @@ describe("Vesting Test", function () {
     await expect((await syn.balanceOf(vesting.address))/1e18).equal(3000000);
     await vesting.init([user1.address, user2.address, user3.address],
         [normalize(1000000), normalize(1500000), normalize(500000)])
-    await expect(vesting.connect(user1).claim(user4.address, normalize(500000))).revertedWith("Vesting:Cliff not reached");;
+    await expect(vesting.connect(user1).claim(user4.address, normalize(500000))).revertedWith("Vesting: Cliff not reached");;
 
     // accelerate
     await network.provider.send("evm_increaseTime", [(365 + 31) * 24 * 3600])
