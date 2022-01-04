@@ -81,4 +81,14 @@ contract AdvisorsVesting is Ownable {
     }
     return grants[grantee].amount;
   }
+
+  function getLostRewards() external onlyOwner {
+    require(block.timestamp > startTime + 670 days, "AdvisorsVesting: too early to recover lost rewards");
+    uint256 amount;
+    for (uint256 i = 0; i < grantees.length; i++) {
+      amount += uint256(grants[msg.sender].amount - grants[msg.sender].claimed);
+      grants[msg.sender].claimed = grants[msg.sender].amount;
+    }
+    SyndicateERC20(syn).transfer(owner(), amount);
+  }
 }
