@@ -81,17 +81,20 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Corner case 2: if time locked is one year, fraction of the year locked is one, and
    *      weight is a deposit amount multiplied by 2 * 1e6
    */
+  // solhint-disable-next-line
   uint256 internal constant WEIGHT_MULTIPLIER = 1e6;
 
   /**
    * @dev When we know beforehand that staking is done for a year, and fraction of the year locked is one,
    *      we use simplified calculation and use the following constant instead previos one
    */
+  // solhint-disable-next-line
   uint256 internal constant YEAR_STAKE_WEIGHT_MULTIPLIER = 2 * WEIGHT_MULTIPLIER;
 
   /**
    * @dev Rewards per weight are stored multiplied by 1e12, as integers.
    */
+  // solhint-disable-next-line
   uint256 internal constant REWARD_PER_WEIGHT_MULTIPLIER = 1e12;
 
   /**
@@ -767,6 +770,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @dev Reentrancy safe due to the EscrowedSyndicateERC20 design
    */
+  // solhint-disable-next-line
   function mintSSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
     EscrowedSyndicateERC20(ssyn).mint(_to, _value);
@@ -777,6 +781,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @dev Reentrancy safety enforced via `ReentrancyGuard.nonReentrant`
    */
+  // solhint-disable-next-line
   function transferPoolToken(address _to, uint256 _value) internal nonReentrant {
     // just delegate call to the target
     SafeERC20.safeTransfer(IERC20(poolToken), _to, _value);
@@ -787,6 +792,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @dev Reentrancy safety enforced via `ReentrancyGuard.nonReentrant`
    */
+  // solhint-disable-next-line
   function transferPoolTokenFrom(
     address _from,
     address _to,

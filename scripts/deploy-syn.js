@@ -7,7 +7,7 @@ const {expect} = require('chai');
 let deployUtils
 
 const grantees = [
-    '0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B',
+  '0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B',
   '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3',
   '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64'
 ]
@@ -28,41 +28,64 @@ async function main() {
     throw new Error('Missing parameters')
   }
 
-  console.log('Deployment started')
+  console.log('Deploying SyndicateERC20...')
   const SYN = await ethers.getContractFactory("SyndicateERC20")
-  const syn = await SYN.deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
+  const syn = await SYN
+      //.attach('0x9e2B8996c8BA8Cca6A23b89656361Ee938829Ccf')
+      .deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
   await syn.deployed()
   console.log('SyndicateERC20 deployed at', syn.address)
 
-  let features =
-      (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
-      (await syn.FEATURE_TRANSFERS()) +
-      (await syn.FEATURE_UNSAFE_TRANSFERS()) +
-      (await syn.FEATURE_DELEGATIONS()) +
-      (await syn.FEATURE_DELEGATIONS_ON_BEHALF())
+  let notReallyDeployesYet = true
+  let features
+
+  // if the network is congested the following can fail
+  while (notReallyDeployesYet) {
+    try {
+      features =
+          (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
+          (await syn.FEATURE_TRANSFERS()) +
+          (await syn.FEATURE_UNSAFE_TRANSFERS()) +
+          (await syn.FEATURE_DELEGATIONS()) +
+          (await syn.FEATURE_DELEGATIONS_ON_BEHALF())
+      notReallyDeployesYet = false
+    } catch (e) {
+      await deployUtils.sleep(1000)
+    }
+  }
 
   await (await syn.updateFeatures(features)).wait()
 
+  console.log('Deploying TeamVesting...')
   const Vesting = await ethers.getContractFactory("TeamVesting")
   const vesting = await Vesting.deploy(syn.address, 365 + 31)
-  console.log('Vesting deployed at', vesting.address)
+  console.log('TeamVesting deployed at', vesting.address)
   await vesting.deployed()
 
+  notReallyDeployesYet = true
+  while (notReallyDeployesYet) {
+    try {
+      await vesting.cliff()
+      notReallyDeployesYet = false
+    } catch (e) {
+      await deployUtils.sleep(1000)
+    }
+  }
   const grants = []
   const maxSupply = ethers.BigNumber.from(normalize(process.env.MAX_TOTAL_SUPPLY))
 
-  for (let i=0;i<grantPoints.length; i++) {
-    grants[i] = maxSupply.div(10000).mul(grantPoints[i])
+  for (let i = 0; i < grantPoints.length; i++) {
+    grants[i] = maxSupply.div(10000).mul(grantPoints[i]).mul(36).div(100)
   }
 
   const totalRewards = grants.reduce((a, b) => {
     return a.add(b)
-  } , ethers.BigNumber.from('0'))
+  }, ethers.BigNumber.from('0'))
 
-  await(await syn.connect(owner).transfer(vesting.address, totalRewards)).wait()
+  await (await syn.connect(owner).transfer(vesting.address, totalRewards)).wait()
 
   await (await vesting.init(grantees, grants)).wait()
-  await deployUtils.saveDeployed(chainId, ['SyndicateERC20', 'Vesting'], [syn.address, vesting.address])
+  await deployUtils.saveDeployed(chainId, ['SyndicateERC20', 'TeamVesting'], [syn.address, vesting.address])
 }
 
 main()
