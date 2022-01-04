@@ -4,6 +4,7 @@ const ethers = hre.ethers
 
 const DeployUtils = require('./lib/DeployUtils')
 const {expect} = require('chai');
+const deployed = require('../export/deployed.json');
 let deployUtils
 
 const grantees = [
@@ -30,17 +31,15 @@ async function main() {
 
   console.log('Deploying SyndicateERC20...')
   const SYN = await ethers.getContractFactory("SyndicateERC20")
-  const syn = await SYN
-      //.attach('0x9e2B8996c8BA8Cca6A23b89656361Ee938829Ccf')
-      .deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
+  const syn = await SYN.deploy(owner.address, process.env.MAX_TOTAL_SUPPLY)
   await syn.deployed()
   console.log('SyndicateERC20 deployed at', syn.address)
 
-  let notReallyDeployesYet = true
+  let notReallyDeployedYet = true
   let features
 
   // if the network is congested the following can fail
-  while (notReallyDeployesYet) {
+  while (notReallyDeployedYet) {
     try {
       features =
           (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
@@ -48,11 +47,25 @@ async function main() {
           (await syn.FEATURE_UNSAFE_TRANSFERS()) +
           (await syn.FEATURE_DELEGATIONS()) +
           (await syn.FEATURE_DELEGATIONS_ON_BEHALF())
-      notReallyDeployesYet = false
+      notReallyDeployedYet = false
     } catch (e) {
       await deployUtils.sleep(1000)
     }
   }
+  const network = chainId === 1 ? 'ethereum'
+      : chainId == 42 ? 'kovan'
+          : 'localhost'
+
+  console.log(`
+To verify SyndicateERC20 source code:
+    
+  npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${syn.address} \\
+      ${owner.address} \\
+      ${process.env.MAX_TOTAL_SUPPLY}
+      
+`)
 
   await (await syn.updateFeatures(features)).wait()
 
@@ -62,11 +75,22 @@ async function main() {
   console.log('TeamVesting deployed at', vesting.address)
   await vesting.deployed()
 
-  notReallyDeployesYet = true
-  while (notReallyDeployesYet) {
+  console.log(`
+To verify TeamVesting source code:
+    
+  npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${vesting.address} \\
+      ${syn.address} \\
+      396
+      
+`)
+
+  notReallyDeployedYet = true
+  while (notReallyDeployedYet) {
     try {
       await vesting.cliff()
-      notReallyDeployesYet = false
+      notReallyDeployedYet = false
     } catch (e) {
       await deployUtils.sleep(1000)
     }
@@ -75,7 +99,9 @@ async function main() {
   const maxSupply = ethers.BigNumber.from(normalize(process.env.MAX_TOTAL_SUPPLY))
 
   for (let i = 0; i < grantPoints.length; i++) {
-    grants[i] = maxSupply.div(10000).mul(grantPoints[i]).mul(36).div(100)
+    let fullGrant = maxSupply.div(10000).mul(grantPoints[i])
+    // in total is 36 1/9 %
+    grants[i] = fullGrant.mul(36).div(100).add(fullGrant.div(900))
   }
 
   const totalRewards = grants.reduce((a, b) => {
