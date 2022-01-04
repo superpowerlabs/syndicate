@@ -8,9 +8,10 @@ const deployed = require('../export/deployed.json');
 let deployUtils
 
 const grantees = [
-  '0x70f41fE744657DF9cC5BD317C58D3e7928e22E1B',
-  '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3',
-  '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64'
+  '0xA32912c58298f49a99B9eA3084721056F5d22FF1', // Fra
+  '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3', // Dev
+  '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64' // Zhi
+    // Roy?
 ]
 // must be adjusted to the negotiated values
 const grantPoints = [120, 100, 140] // 120 = 1.2%
