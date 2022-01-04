@@ -47,8 +47,7 @@ describe("Integration Test", function () {
     const corePoolAddress = await poolFactory.getPoolAddress(syn.address);
     const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");
     const corePool = await SyndicateCorePool.attach(corePoolAddress);
-    corePool.setQuickReward(99999);
-    await network.provider.send("evm_mine");
+    corePool.setQuickRewardRate(1000);
 
     await ssyn.updateRole(corePoolAddress, await syn.ROLE_TOKEN_CREATOR()); // 9
     await syn.connect(user1).approve(corePool.address, normalize(10000));
@@ -57,30 +56,37 @@ describe("Integration Test", function () {
     expect(await ssyn.balanceOf(user1.address)).equal(0);
     await corePool.connect(user1).stake(normalize(1000),
         (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
-    expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(9999.899682905252);
+    expect((await ssyn.balanceOf(user1.address))).equal(0);
+    expect(await corePool.totalQuickReward()).equal(0);
+
+    await corePool.setMaxQuickReward(normalize(100000));
+    await corePool.connect(user1).stake(normalize(1000),
+        (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
+    expect(await ssyn.balanceOf(user1.address)).equal('10099998996827020801623')
+    console.log(await corePool.totalQuickReward());
 
     expect(await corePool.pendingYieldRewards(user1.address)).equal(0);
     await network.provider.send("evm_mine");
 
-    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(4999.999499998999);
+    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(4999.9975);
     await network.provider.send("evm_mine"); // 13
     expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(9999.998999997999);
 
-    expect((await syn.balanceOf(user1.address))/ 1e18).equal(19000.000000000004);
+    expect((await syn.balanceOf(user1.address))/ 1e18).equal(18000);
     await network.provider.send("evm_increaseTime", [366 * 24 * 3600])
     await network.provider.send("evm_mine")
     await corePool.processRewards(true);
 
     let unstakeTx = await corePool.connect(user1).unstake(0, normalize(500), true);
-    expect((await syn.balanceOf(user1.address)) / 1e18).equal(19500);
-    expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(34999.89918289925);
+    expect((await syn.balanceOf(user1.address)) / 1e18).equal(18500);
+    expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(35099.99449682302);
     await corePool.processRewards(true);
     await syn.delegate(owner.address);
     expect((await syn.balanceOf(owner.address))/ 1e18).equal(6999980000);
     expect( (await syn.getVotingPower(owner.address)) / 1e18).equal(6999980000);
     expect( (await syn.getVotingPower(user1.address)) / 1e18).equal(0);
     await corePool.delegate(user1.address);
-    await expect( (await syn.getVotingPower(user1.address)) / 1e18).equal(500);
+    await expect( (await syn.getVotingPower(user1.address)) / 1e18).equal(1500);
 
     await expect(ssyn.connect(user1).transfer(user2.address, normalize(10000))).revertedWith("sSYN: Non Allowed Receiver");
     await ssyn.updateRole(user2.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());

@@ -21,7 +21,11 @@ contract SyndicateCorePool is SyndicatePoolBase {
 
   /// @dev Control parameter of how much reward in sSYN user will get immediately upon staking.
   /// 0 when feature is disabled.  In base points.
-  uint256 public quickReward;
+  uint256 public quickRewardRate;
+
+  uint256 public totalQuickReward;
+
+  uint256 public maxQuickReward;
 
   /// @dev Link to deployed SyndicateVault instance
   address public vault;
@@ -106,12 +110,16 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    *  @dev  divide quick reward by 10000 to get the actual value and 100000 (10x) is used as a general limit
    *
-   *  @param _quickReward the reward weight
+   *  @param _quickRewardRate the reward rate in base point
    */
-  function setQuickReward(uint256 _quickReward) external onlyFactoryOwner {
+  function setQuickRewardRate(uint256 _quickRewardRate) external onlyFactoryOwner {
     // the is a general limit, should not exceed 10x
-    require(_quickReward < 100000, "parameter out of range");
-    quickReward = _quickReward;
+    require(_quickRewardRate < 100000, "parameter out of range");
+    quickRewardRate = _quickRewardRate;
+  }
+
+  function setMaxQuickReward(uint256 _maxQuickReward) external onlyFactoryOwner {
+    maxQuickReward = _maxQuickReward;
   }
 
   /**
@@ -242,9 +250,15 @@ contract SyndicateCorePool is SyndicatePoolBase {
     poolTokenReserve += _amount;
 
     // distribute quick reward, additional checks on _lockedUntil is done in super._stake
-    if (quickReward > 0 && _lockedUntil > 0) {
-      uint256 reward = ((_lockedUntil - now256()) * _amount * quickReward) / (10000 * 365 days);
-      mintSSyn(_staker, reward);
+    if (quickRewardRate > 0 && _lockedUntil > 0) {
+      uint256 reward = ((_lockedUntil - now256()) * _amount * quickRewardRate) / (10000 * 365 days);
+      if (totalQuickReward < maxQuickReward) {
+        if (totalQuickReward + reward > maxQuickReward) {
+          reward = maxQuickReward - totalQuickReward;
+        }
+        mintSSyn(_staker, reward);
+        totalQuickReward += reward;
+      }
     }
   }
 
