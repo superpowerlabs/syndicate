@@ -54,6 +54,8 @@ describe("Vesting Test", function () {
     await vesting.connect(user1).claim(user1.address, normalize(16000000));
     grant = await vesting.grants(user1.address)
     expect(grant.claimed).equal(normalize(36000000));
+
+    await expect(vesting.connect(user1).claim(user1.address, normalize(1000000))).revertedWith('TeamVesting: not enough granted tokens')
     //
     // // two more months
     // await network.provider.send("evm_increaseTime", [65 * 24 * 3600])
