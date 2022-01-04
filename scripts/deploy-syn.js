@@ -43,7 +43,7 @@ async function main() {
 
   await (await syn.updateFeatures(features)).wait()
 
-  const Vesting = await ethers.getContractFactory("Vesting")
+  const Vesting = await ethers.getContractFactory("TeamVesting")
   const vesting = await Vesting.deploy(syn.address, 365 + 31)
   console.log('Vesting deployed at', vesting.address)
   await vesting.deployed()
