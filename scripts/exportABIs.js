@@ -21,6 +21,7 @@ async function main() {
 
   abi('EscrowedSyndicateERC20', 'token')
   abi('SyndicateERC20', 'token')
+  abi('TeamVesting', 'token')
   abi('SyndicatePoolFactory', 'pools')
   abi('SyndicateCorePool', 'pools')
 
