@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "./SyndicateERC20.sol";
+import "../interfaces/IERC20.sol";
 import "../utils/Ownable.sol";
 
 import "hardhat/console.sol";
@@ -39,7 +39,7 @@ contract TeamVesting is Ownable {
       grantees.push(_grantees[i]);
       totalGrants += _amounts[i];
     }
-    require(SyndicateERC20(syn).balanceOf(address(this)) >= totalGrants, "TeamVesting: fund missing");
+    require(IERC20(syn).balanceOf(address(this)) >= totalGrants, "TeamVesting: fund missing");
     startTime = block.timestamp;
   }
 
@@ -56,7 +56,7 @@ contract TeamVesting is Ownable {
     );
     require(uint256(vestedAmount(msg.sender) - grants[msg.sender].claimed) >= _amount, "TeamVesting: not enough vested tokens");
     grants[msg.sender].claimed += uint120(_amount);
-    SyndicateERC20(syn).transfer(recipient, _amount);
+    IERC20(syn).transfer(recipient, _amount);
   }
 
   function vestedAmount(address grantee) public view isGrantee(grantee) returns (uint120) {
@@ -80,6 +80,6 @@ contract TeamVesting is Ownable {
       amount += uint256(grants[msg.sender].amount - grants[msg.sender].claimed);
       grants[msg.sender].claimed = grants[msg.sender].amount;
     }
-    SyndicateERC20(syn).transfer(owner(), amount);
+    IERC20(syn).transfer(owner(), amount);
   }
 }
