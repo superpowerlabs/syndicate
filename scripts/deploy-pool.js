@@ -26,7 +26,7 @@ async function main() {
 
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
-  console.log('Deployment started')
+  console.log('Deploying SyndicatePoolFactory')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
   const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber() + 40)
   const poolFactory = await PoolFactory.deploy(
@@ -40,13 +40,49 @@ async function main() {
   await poolFactory.deployed()
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
 
+  const network = chainId === 1 ? 'ethereum'
+      : chainId == 42 ? 'kovan'
+          : 'localhost'
+
+  console.log(`
+To verify SyndicatePoolFactory source code:
+    
+  npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${poolFactory.address} \\
+      ${synAddress} \\
+      ${ssynAddress} \\
+      ${ethers.utils.parseEther(SYN_PER_BLOCK).toString()} \\
+      ${ethers.BigNumber.from(BLOCK_PER_UPDATE).toString()} \\
+      ${blockNumberFactoryConstructor} \\
+      ${blockNumberFactoryConstructor + parseInt(BLOCK_MULTIPLIER)} \\
+      
+`)
+
   const blockNumberPoolCreation = await ethers.provider.getBlockNumber()
+
+  console.log('Creating SyndicateCorePool')
   const tx = await poolFactory.connect(owner).createPool(synAddress, blockNumberPoolCreation, WEIGHT)
   await tx.wait()
 
   const synPoolAddress = await poolFactory.getPoolAddress(synAddress)
   const corePool = await deployUtils.getContract('SyndicateCorePool', 'pools', synPoolAddress, chainId)
   console.log('SyndicateCorePool deployed at', corePool.address)
+
+  console.log(`
+To verify SyndicateCorePool source code:
+    
+  npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${corePool.address} \\
+      ${synAddress} \\
+      ${ssynAddress} \\
+      ${poolFactory.address} \\
+      ${synAddress} \\
+      ${blockNumberPoolCreation} \\
+      ${WEIGHT}
+      
+`)
 
   await corePool.connect(owner).setQuickReward(ethers.BigNumber.from(process.env.QUICK_REWARDS))
   console.log('Quick reward set')

@@ -65,7 +65,7 @@ switch (what) {
       ${deployed[chainId].SyndicatePoolFactory} \\
       ${synAddress} \\
       ${blockNumberPoolCreation} \\
-      1`
+      ${synPerBlock}`
     break
 }
 
