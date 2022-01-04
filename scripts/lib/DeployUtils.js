@@ -8,6 +8,11 @@ class DeployUtils {
     this.ethers = ethers
   }
 
+  async sleep(millis) {
+    // eslint-disable-next-line no-undef
+    return new Promise((resolve) => setTimeout(resolve, millis));
+  }
+
   getProviders() {
     const {INFURA_API_KEY} = process.env
 

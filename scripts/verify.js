@@ -24,6 +24,14 @@ switch (what) {
       ${deployed[chainId].EscrowedSyndicateERC20}`
     break
 
+  case 'team':
+    cmd = `npx hardhat verify --show-stack-traces \\
+      --network ${network} \\
+      ${deployed[chainId].TeamVesting} \\
+      ${deployed[chainId].SyndicateERC20} \\
+      396`
+    break
+
   case 'syn':
     cmd = `npx hardhat verify --show-stack-traces \\
       --network ${network} \\
