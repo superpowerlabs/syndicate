@@ -19,7 +19,7 @@ describe("Vesting Test", function () {
     const maxTotalSupply = 10000000000; // 10 billions
     let [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
     const SYN = await ethers.getContractFactory("SyndicateERC20");
-    const syn = await SYN.deploy(owner.address, maxTotalSupply);
+    const syn = await SYN.deploy(owner.address, maxTotalSupply, owner.address);
 
     let features = (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
         (await syn.FEATURE_TRANSFERS()) +

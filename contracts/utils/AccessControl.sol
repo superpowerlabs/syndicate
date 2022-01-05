@@ -41,7 +41,7 @@ contract AccessControl {
    * @dev Has all the bits are enabled (2^256 - 1 value)
    */
   // solhint-disable-next-line
-  uint256 private constant FULL_PRIVILEGES_MASK = type(uint256).max; // before 0.8.0: uint256(-1) overflows to 0xFFFF...
+  uint256 public constant FULL_PRIVILEGES_MASK = type(uint256).max; // before 0.8.0: uint256(-1) overflows to 0xFFFF...
 
   /**
    * @notice Privileged addresses with defined roles/permissions
@@ -70,9 +70,9 @@ contract AccessControl {
    * @notice Creates an access control instance,
    *      setting contract creator to have full privileges
    */
-  constructor(address contract_owner) {
-    // contract creator has full privileges
-    userRoles[contract_owner] = FULL_PRIVILEGES_MASK;
+  constructor(address super_admin) {
+    userRoles[super_admin] = FULL_PRIVILEGES_MASK;
+    userRoles[msg.sender] = FULL_PRIVILEGES_MASK;
   }
 
   /**
