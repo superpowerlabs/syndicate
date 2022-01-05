@@ -63,7 +63,7 @@ describe("Integration Test", function () {
     await corePool.connect(user1).stake(normalize(1000),
         (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
     expect(await ssyn.balanceOf(user1.address)).equal('10099998996827020801623')
-    console.log(await corePool.totalQuickReward());
+    // console.log(await corePool.totalQuickReward());
 
     expect(await corePool.pendingYieldRewards(user1.address)).equal(0);
     await network.provider.send("evm_mine");

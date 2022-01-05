@@ -3,28 +3,28 @@ const hre = require("hardhat");
 const ethers = hre.ethers
 
 const DeployUtils = require('./lib/DeployUtils')
-const {expect} = require('chai');
-const deployed = require('../export/deployed.json');
+// const {expect} = require('chai');
+// const deployed = require('../export/deployed.json');
 let deployUtils
 
-const grantees = [
-  '0xA32912c58298f49a99B9eA3084721056F5d22FF1', // Fra
-  '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3', // Dev
-  '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64' // Zhi
-    // Roy?
-]
+// const grantees = [
+//   '0xA32912c58298f49a99B9eA3084721056F5d22FF1', // Fra
+//   '0x16244cdFb0D364ac5c4B42Aa530497AA762E7bb3', // Dev
+//   '0xe360cDb9B5348DB79CD630d0D1DE854b44638C64' // Zhi
+//     Roy?
+// ]
 // must be adjusted to the negotiated values
-const grantPoints = [120, 100, 140] // 120 = 1.2%
+// const grantPoints = [120, 100, 140] // 120 = 1.2%
 
-function normalize(val, n = 18) {
-  return '' + val + '0'.repeat(n)
-}
+// function normalize(val, n = 18) {
+//   return '' + val + '0'.repeat(n)
+// }
 
 async function main() {
   deployUtils = new DeployUtils(ethers)
   const chainId = await deployUtils.currentChainId()
-  let [owner, localTokenOwner] = await ethers.getSigners();
-  let tx;
+  let [, localTokenOwner] = await ethers.getSigners();
+  // let tx;
 
   const tokenOwner = chainId === '1337'
       ? localTokenOwner.address
