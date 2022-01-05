@@ -39,13 +39,8 @@ module.exports = {
     },
     ethereum: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
-      accounts: [process.env.OWNER_PRIVATE_KEY],
+      accounts: [envJson.ethereum.privateKey],
       chainId: 1,
-    },
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,
-      accounts: [process.env.OWNER_PRIVATE_KEY],
-      chainId: 3,
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY || ''}`,

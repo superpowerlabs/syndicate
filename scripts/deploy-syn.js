@@ -23,8 +23,12 @@ function normalize(val, n = 18) {
 async function main() {
   deployUtils = new DeployUtils(ethers)
   const chainId = await deployUtils.currentChainId()
-  let [owner, tokenOwner] = await ethers.getSigners();
+  let [owner, localTokenOwner] = await ethers.getSigners();
   let tx;
+
+  const tokenOwner = chainId === '1337'
+      ? localTokenOwner.address
+      : process.env.TOKEN_OWNER
 
   if (!process.env.MAX_TOTAL_SUPPLY) {
     throw new Error('Missing parameters')
@@ -32,7 +36,7 @@ async function main() {
 
   console.log('Deploying SyndicateERC20...')
   const SYN = await ethers.getContractFactory("SyndicateERC20")
-  const syn = await SYN.deploy(tokenOwner.address, process.env.MAX_TOTAL_SUPPLY)
+  const syn = await SYN.deploy(tokenOwner, process.env.MAX_TOTAL_SUPPLY)
   await syn.deployed()
   console.log('SyndicateERC20 deployed at', syn.address)
 
@@ -63,7 +67,7 @@ To verify SyndicateERC20 source code:
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
       ${syn.address} \\
-      ${owner.address} \\
+      ${tokenOwner} \\
       ${process.env.MAX_TOTAL_SUPPLY}
       
 `)
