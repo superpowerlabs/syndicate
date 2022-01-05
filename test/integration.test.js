@@ -17,11 +17,11 @@ describe("Integration Test", function () {
   it("should verify that the entire process works", async function () {
 
     const maxTotalSupply = 10000000000; // 10 billions
-    let [owner, user1, user2, user3] = await ethers.getSigners();
+    let [owner, user1, user2, user3, tokenOwner] = await ethers.getSigners();
     const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20");
     const ssyn = await SSYN.deploy();
     const SYN = await ethers.getContractFactory("SyndicateERC20");
-    const syn = await SYN.deploy(owner.address, maxTotalSupply);
+    const syn = await SYN.deploy(tokenOwner.address, maxTotalSupply);
 
     let features = (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
         (await syn.FEATURE_TRANSFERS()) +
@@ -29,7 +29,7 @@ describe("Integration Test", function () {
         (await syn.FEATURE_DELEGATIONS()) +
         (await syn.FEATURE_DELEGATIONS_ON_BEHALF());
     await syn.updateFeatures(features)
-    await syn.transfer(user1.address, normalize(20000));
+    await syn.connect(tokenOwner).transfer(user1.address, normalize(20000));
     expect((await syn.balanceOf(user1.address)) / 1e18).equal(20000);
 
     const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory");
@@ -81,8 +81,8 @@ describe("Integration Test", function () {
     expect((await syn.balanceOf(user1.address)) / 1e18).equal(18500);
     expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(35099.99449682302);
     await corePool.processRewards(true);
-    await syn.delegate(owner.address);
-    expect((await syn.balanceOf(owner.address))/ 1e18).equal(6999980000);
+    await syn.connect(tokenOwner).delegate(owner.address);
+    expect((await syn.balanceOf(tokenOwner.address))/ 1e18).equal(6999980000);
     expect( (await syn.getVotingPower(owner.address)) / 1e18).equal(6999980000);
     expect( (await syn.getVotingPower(user1.address)) / 1e18).equal(0);
     await corePool.delegate(user1.address);
