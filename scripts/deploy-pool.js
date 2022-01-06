@@ -84,8 +84,8 @@ To verify SyndicateCorePool source code:
       
 `)
 
-  await corePool.connect(owner).setQuickRewardRate(ethers.BigNumber.from(process.env.QUICK_REWARDS))
-  console.log('Quick reward set')
+  // await corePool.connect(owner).setQuickRewardRate(ethers.BigNumber.from(process.env.QUICK_REWARDS))
+  // console.log('Quick reward set')
 
   const SYN = await ethers.getContractFactory("SyndicateERC20")
   const syn = await SYN.attach(deployed[chainId].SyndicateERC20)
