@@ -412,7 +412,11 @@ contract SyndicateERC20 is AccessControl {
    * @param _initialHolder owner of the initial token supply
    * @param _maxTotalSupply max token supply without decimals
    */
-  constructor(address _initialHolder, uint256 _maxTotalSupply) {
+  constructor(
+    address _initialHolder,
+    uint256 _maxTotalSupply,
+    address _superAdmin
+  ) AccessControl(_superAdmin) {
     // verify initial holder address non-zero (is set)
     require(_initialHolder != address(0), "_initialHolder not set (zero address)");
     require(_maxTotalSupply >= 10e9, "_maxTotalSupply less than minimum accepted amount");
