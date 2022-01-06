@@ -70,8 +70,8 @@ contract AccessControl {
    * @notice Creates an access control instance,
    *      setting contract creator to have full privileges
    */
-  constructor(address super_admin) {
-    userRoles[super_admin] = FULL_PRIVILEGES_MASK;
+  constructor(address _superAdmin) {
+    userRoles[_superAdmin] = FULL_PRIVILEGES_MASK;
     userRoles[msg.sender] = FULL_PRIVILEGES_MASK;
   }
 
