@@ -5,7 +5,6 @@ import "../utils/ERC20.sol";
 import "../utils/AccessControl.sol";
 
 contract EscrowedSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), AccessControl {
-  mapping(address => bool) public allowedReceivers;
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
