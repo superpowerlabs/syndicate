@@ -18,8 +18,8 @@ async function main() {
 
   const [owner, tokenOwner] = await ethers.getSigners()
 
-  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, QUICK_REWARDS, WEIGHT} = process.env
-  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !QUICK_REWARDS || !WEIGHT) {
+  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, WEIGHT} = process.env
+  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !WEIGHT) {
     throw new Error('Missing parameters')
   }
 
