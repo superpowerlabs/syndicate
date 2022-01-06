@@ -43,9 +43,9 @@ describe("Integration Test", function () {
 
 
     const createPoolTx = await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1);
-    console.log(await syn.userRoles(deployer.address));
+    await expect((await syn.userRoles(deployer.address)).toString()).equal('115792089237316195423570985008687907853269984665640564039457584007913129639935');
     await syn.connect(superAdmin).updateRole(deployer.address, 0);
-    console.log(await syn.userRoles(deployer.address));
+    await expect((await syn.userRoles(deployer.address)).toString()).equal('0');
 
     const corePoolAddress = await poolFactory.getPoolAddress(syn.address);
     const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");

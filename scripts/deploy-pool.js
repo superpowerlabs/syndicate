@@ -16,10 +16,10 @@ async function main() {
   const chainId = await deployUtils.currentChainId()
   console.log('chainId', chainId)
 
-  const [owner] = await ethers.getSigners()
+  const [owner, tokenOwner] = await ethers.getSigners()
 
-  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, QUICK_REWARDS, WEIGHT} = process.env
-  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !QUICK_REWARDS || !WEIGHT) {
+  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, WEIGHT} = process.env
+  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !WEIGHT) {
     throw new Error('Missing parameters')
   }
 
@@ -84,8 +84,8 @@ To verify SyndicateCorePool source code:
       
 `)
 
-  await corePool.connect(owner).setQuickReward(ethers.BigNumber.from(process.env.QUICK_REWARDS))
-  console.log('Quick reward set')
+  // await corePool.connect(owner).setQuickRewardRate(ethers.BigNumber.from(process.env.QUICK_REWARDS))
+  // console.log('Quick reward set')
 
   const SYN = await ethers.getContractFactory("SyndicateERC20")
   const syn = await SYN.attach(deployed[chainId].SyndicateERC20)

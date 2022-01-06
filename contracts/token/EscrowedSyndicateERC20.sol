@@ -14,9 +14,7 @@ contract EscrowedSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), A
    */
   uint256 public constant TOKEN_UID = 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62;
 
-  constructor(address _superAdmin) AccessControl(_superAdmin) {
-
-  }
+  constructor(address _superAdmin) AccessControl(_superAdmin) {}
 
   /**
    * @notice Must be called by ROLE_TOKEN_CREATOR addresses.
