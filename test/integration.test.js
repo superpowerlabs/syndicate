@@ -36,11 +36,10 @@ describe("Integration Test", function () {
 
     // deploy factory
     const poolFactory = await PoolFactory.deploy(syn.address, ssyn.address,
-        normalize(5000), // synPerBlock
-        100000000, // blockPerUpdate, decrease reward by 3%
+        normalize(990), // synPerBlock
+        91252, // blockPerUpdate, decrease reward by 3%
         await ethers.provider.getBlockNumber(),
-        await ethers.provider.getBlockNumber() + 10000000);
-
+        await ethers.provider.getBlockNumber() + 7120725);
 
     const createPoolTx = await poolFactory.createPool(syn.address, await ethers.provider.getBlockNumber(), 1);
     await expect((await syn.userRoles(deployer.address)).toString()).equal('115792089237316195423570985008687907853269984665640564039457584007913129639935');
@@ -50,7 +49,6 @@ describe("Integration Test", function () {
     const corePoolAddress = await poolFactory.getPoolAddress(syn.address);
     const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");
     const corePool = await SyndicateCorePool.attach(corePoolAddress);
-    corePool.setQuickRewardRate(1000);
 
     await ssyn.connect(superAdmin).updateRole(corePoolAddress, await syn.ROLE_TOKEN_CREATOR()); // 9
     await syn.connect(user1).approve(corePool.address, normalize(10000));
@@ -60,30 +58,27 @@ describe("Integration Test", function () {
     await corePool.connect(user1).stake(normalize(1000),
         (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
     expect((await ssyn.balanceOf(user1.address))).equal(0);
-    expect(await corePool.totalQuickReward()).equal(0);
-
-    await corePool.setMaxQuickReward(normalize(100000));
 
     await corePool.connect(user1).stake(normalize(1000),
         (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
-    expect(await ssyn.balanceOf(user1.address)).equal('10099998996827020801623')
+    expect(await ssyn.balanceOf(user1.address)).equal('989999505000000000000')
 
     expect(await corePool.pendingYieldRewards(user1.address)).equal(0);
     await network.provider.send("evm_mine");
 
-    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(4999.9975);
+    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(989.999505);
     await network.provider.send("evm_mine"); // 13
-    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(9999.998999997999);
+    expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(1979.99901);
 
     expect((await syn.balanceOf(user1.address))/ 1e18).equal(18000);
     await network.provider.send("evm_increaseTime", [366 * 24 * 3600])
     await network.provider.send("evm_mine")
-    await corePool.processRewards(true);
+    await corePool.connect(user1).processRewards(true);
 
     let unstakeTx = await corePool.connect(user1).unstake(0, normalize(500), true);
     expect((await syn.balanceOf(user1.address)) / 1e18).equal(18500);
-    expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(35099.99449682302);
-    await corePool.processRewards(true);
+    expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(5939.9970299999995);
+    await corePool.connect(user1).processRewards(true);
     await syn.connect(fundOwner).delegate(fundOwner.address);
     expect((await syn.balanceOf(fundOwner.address))/ 1e18).equal(6999980000);
     expect( (await syn.getVotingPower(fundOwner.address)) / 1e18).equal(6999980000);
@@ -93,14 +88,13 @@ describe("Integration Test", function () {
 
     await expect(ssyn.connect(user1).transfer(user2.address, normalize(10000))).revertedWith("sSYN: Non Allowed Receiver");
     await ssyn.connect(superAdmin).updateRole(user2.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
-    await ssyn.connect(user1).transfer(user2.address, normalize(10000));
-    expect((await ssyn.balanceOf(user2.address))/ 1e18).equal(10000);
+    await ssyn.connect(user1).transfer(user2.address, normalize(1000));
+    expect((await ssyn.balanceOf(user2.address))/ 1e18).equal(1000);
 
     features =
         (await syn.FEATURE_TRANSFERS()) + (await syn.FEATURE_UNSAFE_TRANSFERS() + (await syn.FEATURE_DELEGATIONS())
             + (await syn.FEATURE_DELEGATIONS_ON_BEHALF()));
     await syn.connect(superAdmin).updateFeatures(features)
-
     await expect(syn.connect(user1).approve(user2.address, normalize(5000))).revertedWith("SYN: spender not allowed");
     await syn.connect(superAdmin).updateRole(user2.address, await syn.ROLE_WHITE_LISTED_SPENDER());
     await syn.connect(user1).approve(user2.address, normalize(5000));
