@@ -6,6 +6,7 @@ import "./SyndicatePoolBase.sol";
 
 /**
  * @title Syndicate Flash Pool
+ *        Original title: Illuvium Flash Pool
  *
  * @notice Flash pools represent temporary pools like SYN/SNX pool,
  *      flash pools allow staking for exactly 1 year period

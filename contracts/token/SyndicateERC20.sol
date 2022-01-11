@@ -7,6 +7,7 @@ import "./ERC20Receiver.sol";
 
 /**
  * @title Syndicate (SYN) ERC20 token
+ *        Original title: Illuvium (ILV) ERC20 token
  *
  * @notice Syndicate is a core ERC20 token powering the game.
  *      It serves as an in-game currency, is tradable on exchanges,
@@ -48,6 +49,7 @@ import "./ERC20Receiver.sol";
  *      See: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
  *
  * @author Basil Gorin
+ * Adapted for Syn City by Superpower Labs
  */
 contract SyndicateERC20 is AccessControl {
   /**

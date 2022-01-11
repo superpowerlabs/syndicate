@@ -6,6 +6,7 @@ import "./SyndicatePoolBase.sol";
 
 /**
  * @title Syndicate Core Pool
+ *        Original title: Illuvium Core Pool
  *
  * @notice Core pools represent permanent pools like SYN or SYN/ETH Pair pool,
  *      core pools allow staking for arbitrary periods of time up to 1 year
@@ -13,6 +14,7 @@ import "./SyndicatePoolBase.sol";
  * @dev See SyndicatePoolBase for more details
  *
  * @author Pedro Bergamini, reviewed by Basil Gorin
+ * Adapted for Syn City by Superpower Labs
  */
 contract SyndicateCorePool is SyndicatePoolBase {
   /// @dev Flag indicating pool type, false means "core pool"
