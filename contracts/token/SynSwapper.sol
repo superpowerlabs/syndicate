@@ -20,26 +20,27 @@ contract SynSwapper is AccessControl {
   event SynSwapped(address swapper, uint256 amount);
 
   address public owner;
-  address public syn;
-  address public ssyn;
+  SyndicateERC20 public syn;
+  SyntheticSyndicateERC20 public ssyn;
 
   constructor(
     address _superAdmin,
     address _syn,
     address _ssyn
   ) AccessControl(_superAdmin) {
-    syn = _syn;
-    ssyn = _ssyn;
+    syn = SyndicateERC20(_syn);
+    ssyn = SyntheticSyndicateERC20(_ssyn);
   }
 
   /**
    * @notice Swaps an amount of sSYN for an identical amount of SYN
-   * @param recipient  The address of account to burn the sSYN and receive the SSYN
+   *         Everyone can execute it, but it will have effect only if the recipient
+   *         has the required roles.
    * @param amount     The amount of token to be swapped
    */
-  function swap(address recipient, uint256 amount) external {
-    require(isSenderInRole(ROLE_ACCESS_MANAGER), "sSYN: insufficient privileges (ROLE_ACCESS_MANAGER required)");
-     SyntheticSyndicateERC20(ssyn).burn(recipient, amount);
-    SyndicateERC20(syn).mint(recipient, amount);
+  function swap(uint256 amount) external {
+    require(syn.isOperatorInRole(msg.sender, syn.ROLE_TREASURY()), "SYN: not a treasury");
+    ssyn.burn(msg.sender, amount);
+    syn.mint(msg.sender, amount);
   }
 }
