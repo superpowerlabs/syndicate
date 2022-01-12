@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../utils/ERC20.sol";
 import "../utils/AccessControl.sol";
 
-contract EscrowedSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), AccessControl {
+contract  SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), AccessControl {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed

@@ -6,7 +6,7 @@ import "../interfaces/ICorePool.sol";
 import "./ReentrancyGuard.sol";
 import "./SyndicatePoolFactory.sol";
 import "../utils/SafeERC20.sol";
-import "../token/EscrowedSyndicateERC20.sol";
+import "../token/SyntheticSyndicateERC20.sol";
 
 /**
  * @title Syndicate Pool Base
@@ -51,7 +51,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Token holder storage, maps token holder address to their data record
   mapping(address => User) public users;
 
-  /// @dev Link to sSYN ERC20 Token EscrowedSyndicateERC20 instance
+  /// @dev Link to sSYN ERC20 Token  SyntheticSyndicateERC20 instance
   address public immutable override ssyn;
 
   /// @dev Link to the pool factory SyndicatePoolFactory instance
@@ -159,7 +159,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Overridden in sub-contracts to construct the pool
    *
    * @param _syn SYN ERC20 Token SyndicateERC20 address
-   * @param _ssyn sSYN ERC20 Token EscrowedSyndicateERC20 address
+   * @param _ssyn sSYN ERC20 Token  SyntheticSyndicateERC20 address
    * @param _factory Pool factory SyndicatePoolFactory instance/address
    * @param _poolToken token the pool operates on, for example SYN or SYN/ETH pair
    * @param _initBlock initial block used to calculate the rewards
@@ -184,7 +184,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // verify sSYN instance supplied
     require(
-      EscrowedSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
+       SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
       "unexpected sSYN TOKEN_UID"
     );
     // verify SyndicatePoolFactory instance supplied
@@ -767,15 +767,15 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   }
 
   /**
-   * @dev Executes EscrowedSyndicateERC20.mint(_to, _values)
-   *      on the bound EscrowedSyndicateERC20 instance
+   * @dev Executes  SyntheticSyndicateERC20.mint(_to, _values)
+   *      on the bound  SyntheticSyndicateERC20 instance
    *
-   * @dev Reentrancy safe due to the EscrowedSyndicateERC20 design
+   * @dev Reentrancy safe due to the  SyntheticSyndicateERC20 design
    */
   // solhint-disable-next-line
   function mintSSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
-    EscrowedSyndicateERC20(ssyn).mint(_to, _value);
+     SyntheticSyndicateERC20(ssyn).mint(_to, _value);
   }
 
   /**

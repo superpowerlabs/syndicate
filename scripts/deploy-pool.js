@@ -25,7 +25,7 @@ async function main() {
 
 
   const synAddress = deployed[chainId].SyndicateERC20
-  const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
+  const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SyndicatePoolFactory')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
   const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber() + 40)
@@ -90,8 +90,8 @@ To verify SyndicateCorePool source code:
   const SYN = await ethers.getContractFactory("SyndicateERC20")
   const syn = await SYN.attach(deployed[chainId].SyndicateERC20)
 
-  const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20")
-  const ssyn = await SSYN.attach(deployed[chainId].EscrowedSyndicateERC20)
+  const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20")
+  const ssyn = await SSYN.attach(deployed[chainId].SyntheticSyndicateERC20)
 
   await ssyn.connect(owner).updateRole(corePool.address, await syn.ROLE_TOKEN_CREATOR()); // 9
   console.log('Pool authorized to manage sSYN')

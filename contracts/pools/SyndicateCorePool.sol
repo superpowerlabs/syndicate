@@ -77,7 +77,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    * @dev Creates/deploys an instance of the core pool
    *
    * @param _syn SYN ERC20 Token SyndicateERC20 address
-   * @param _ssyn sSYN ERC20 Token EscrowedSyndicateERC20 address
+   * @param _ssyn sSYN ERC20 Token  SyntheticSyndicateERC20 address
    * @param _factory Pool factory SyndicatePoolFactory instance/address
    * @param _poolToken token the pool operates on, for example SYN or SYN/ETH pair
    * @param _initBlock initial block used to calculate the rewards

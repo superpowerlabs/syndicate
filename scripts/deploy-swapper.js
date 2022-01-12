@@ -27,7 +27,7 @@ async function main() {
       : process.env.SUPER_ADMIN
 
   const synAddress = deployed[chainId].SyndicateERC20
-  const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
+  const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SynSwapper')
   const SynSwapper = await ethers.getContractFactory("SynSwapper")
   const synSwapper = await SynSwapper.deploy(

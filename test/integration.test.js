@@ -18,7 +18,7 @@ describe("Integration Test", function () {
 
     const maxTotalSupply = 10000000000; // 10 billions
     let [deployer, fundOwner, superAdmin, user1, user2, marketplace, treasury] = await ethers.getSigners();
-    const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20");
+    const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20");
     const ssyn = await SSYN.deploy(superAdmin.address);
     const SYN = await ethers.getContractFactory("SyndicateERC20");
     const syn = await SYN.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);

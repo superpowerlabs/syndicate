@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import "./SyndicateERC20.sol";
-import "./EscrowedSyndicateERC20.sol";
+import "./SyntheticSyndicateERC20.sol";
 import "../utils/AccessControl.sol";
 
 import "hardhat/console.sol";
@@ -39,7 +39,7 @@ contract SynSwapper is AccessControl {
    */
   function swap(address recipient, uint256 amount) external {
     require(isSenderInRole(ROLE_ACCESS_MANAGER), "sSYN: insufficient privileges (ROLE_ACCESS_MANAGER required)");
-    EscrowedSyndicateERC20(ssyn).burn(recipient, amount);
+     SyntheticSyndicateERC20(ssyn).burn(recipient, amount);
     SyndicateERC20(syn).mint(recipient, amount);
   }
 }
