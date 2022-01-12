@@ -24,7 +24,7 @@ describe("Integration Test", function () {
     const syn = await SYN.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
 
     const Swapper = await ethers.getContractFactory("SynSwapper");
-    const swapper = await Swapper.deploy(fundOwner.address, syn.address, ssyn.address);
+    const swapper = await Swapper.deploy(superAdmin.address, syn.address, ssyn.address);
 
     let features = (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
         (await syn.FEATURE_TRANSFERS()) +
@@ -118,7 +118,7 @@ describe("Integration Test", function () {
 
     let ssynAmount = await ssyn.balanceOf(treasury.address)
     expect(ssynAmount/ 1e18).equal(1000);
-    await swapper.connect(fundOwner).swap(treasury.address, ssynAmount)
+    await swapper.connect(superAdmin).swap(treasury.address, ssynAmount)
     expect((await ssyn.balanceOf(treasury.address)) / 1e18).equal(0);
     expect((await syn.balanceOf(treasury.address)) / 1e18).equal(1000);
 
