@@ -18,13 +18,13 @@ async function main() {
       ? localSuperAdmin.address
       : process.env.SUPER_ADMIN
 
-  console.log('Deploying EscrowedSyndicateERC20...')
-  const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20")
+  console.log('Deploying SyntheticSyndicateERC20...')
+  const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20")
   const ssyn = await SSYN.deploy(superAdmin)
   await ssyn.deployed()
 
   console.log(`
-To verify EscrowedSyndicateERC20 source code:
+To verify SyntheticSyndicateERC20 source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
@@ -33,8 +33,8 @@ To verify EscrowedSyndicateERC20 source code:
       
 `)
 
-  console.log('EscrowedSyndicateERC20 deployed at', ssyn.address)
-  await deployUtils.saveDeployed(chainId, ['EscrowedSyndicateERC20'], [ssyn.address])
+  console.log('SyntheticSyndicateERC20 deployed at', ssyn.address)
+  await deployUtils.saveDeployed(chainId, ['SyntheticSyndicateERC20'], [ssyn.address])
 }
 
 main()

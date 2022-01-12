@@ -19,7 +19,7 @@ async function main() {
     ABIs.contracts[name] = json.abi
   }
 
-  abi('EscrowedSyndicateERC20', 'token')
+  abi('SyntheticSyndicateERC20', 'token')
   abi('SyndicateERC20', 'token')
   abi('TeamVesting', 'token')
   abi('SyndicatePoolFactory', 'pools')

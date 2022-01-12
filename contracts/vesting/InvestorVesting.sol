@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "./SyndicateERC20.sol";
+import "../token/SyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
 import "hardhat/console.sol";

@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../interfaces/IPool.sol";
 import "./SyndicateAware.sol";
 import "./SyndicateCorePool.sol";
-import "../token/EscrowedSyndicateERC20.sol";
+import "../token/SyntheticSyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
 /**
@@ -147,7 +147,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
 
     // verify sSYN instance supplied
     require(
-      EscrowedSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
+       SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
       "unexpected sSYN TOKEN_UID"
     );
 

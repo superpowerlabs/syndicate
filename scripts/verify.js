@@ -15,13 +15,13 @@ let owner = chainId === 1337
 
 let cmd
     const synAddress = deployed[chainId].SyndicateERC20
-    const ssynAddress = deployed[chainId].EscrowedSyndicateERC20
+    const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
 switch (what) {
 
   case 'ssyn':
     cmd = `npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${deployed[chainId].EscrowedSyndicateERC20}`
+      ${deployed[chainId].SyntheticSyndicateERC20}`
     break
 
   case 'team':
