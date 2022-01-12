@@ -12,7 +12,7 @@ import "../interfaces/ILinkedToSYN.sol";
  *      be linked to verified SyndicateERC20 instance and performing some basic tasks on it
  *
  * @author Basil Gorin
- *         Adapted for Syn City by Superpower Labs
+ * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicateAware is ILinkedToSYN {
   /// @dev Link to SYN ERC20 Token SyndicateERC20 instance

@@ -29,7 +29,7 @@ import "../token/EscrowedSyndicateERC20.sol";
  *      pool weight by total pools weight (sum of all registered pools within the factory)
  *
  * @author Pedro Bergamini, reviewed by Basil Gorin
- *         Adapted for Syn City by Superpower Labs
+ * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Data structure representing token holder using a pool
