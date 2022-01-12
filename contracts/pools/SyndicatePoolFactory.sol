@@ -22,7 +22,7 @@ import "../utils/Ownable.sol";
  *      (see `mintYieldTo` function)
  *
  * @author Pedro Bergamini, reviewed by Basil Gori
- * Adapted for Syn City by Superpower Labs
+ *         Adapted for Syn City by Superpower Labs
  */
 contract SyndicatePoolFactory is Ownable, SyndicateAware {
   /**

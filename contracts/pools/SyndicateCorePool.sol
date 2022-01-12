@@ -14,7 +14,7 @@ import "./SyndicatePoolBase.sol";
  * @dev See SyndicatePoolBase for more details
  *
  * @author Pedro Bergamini, reviewed by Basil Gorin
- * Adapted for Syn City by Superpower Labs
+ *         Adapted for Syn City by Superpower Labs
  */
 contract SyndicateCorePool is SyndicatePoolBase {
   /// @dev Flag indicating pool type, false means "core pool"

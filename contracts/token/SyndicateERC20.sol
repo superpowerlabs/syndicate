@@ -49,7 +49,7 @@ import "./ERC20Receiver.sol";
  *      See: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
  *
  * @author Basil Gorin
- * Adapted for Syn City by Superpower Labs
+ *         Adapted for Syn City by Superpower Labs
  */
 contract SyndicateERC20 is AccessControl {
   /**

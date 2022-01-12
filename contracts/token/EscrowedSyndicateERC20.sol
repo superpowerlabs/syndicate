@@ -13,6 +13,10 @@ contract EscrowedSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), A
    */
   uint256 public constant TOKEN_UID = 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62;
 
+  uint32 public constant ROLE_TOKEN_DESTROYER = 0x0002_0000;
+
+  uint32 public constant ROLE_WHITE_LISTED_RECEIVER = 0x0004_0000;
+
   constructor(address _superAdmin) AccessControl(_superAdmin) {}
 
   /**
@@ -33,7 +37,18 @@ contract EscrowedSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), A
     _burn(msg.sender, amount);
   }
 
-  uint32 public constant ROLE_WHITE_LISTED_RECEIVER = 0x0002_0000;
+  /**
+   * @notice Must be called by ROLE_TOKEN_DESTROYER addresses.
+   *         Can burn only tokens owned by ROLE_WHITE_LISTED_RECEIVER address
+   *
+   * @param recipient address to burn the tokens.
+   * @param amount number of tokens to be burned
+   */
+  function burn(address recipient, uint256 amount) external {
+    require(isSenderInRole(ROLE_TOKEN_DESTROYER), "sSYN: insufficient privileges (ROLE_TOKEN_DESTROYER required)");
+    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
+    _burn(recipient, amount);
+  }
 
   function _transfer(
     address sender,

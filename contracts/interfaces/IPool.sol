@@ -10,7 +10,7 @@ import "./ILinkedToSYN.sol";
  * @notice An abstraction representing a pool, see SyndicatePoolBase for details
  *
  * @author Pedro Bergamini, reviewed by Basil Gorin
- * Adapted for Syn City by Superpower Labs
+ *         Adapted for Syn City by Superpower Labs
  */
 interface IPool is ILinkedToSYN {
   /**
