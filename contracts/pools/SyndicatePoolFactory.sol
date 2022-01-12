@@ -9,6 +9,7 @@ import "../utils/Ownable.sol";
 
 /**
  * @title Syndicate Pool Factory
+ *        Original title: Illuvium Pool Factory
  *
  * @notice SYN Pool Factory manages Syndicate Yield farming pools, provides a single
  *      public interface to access the pools, provides an interface for the pools
@@ -21,6 +22,7 @@ import "../utils/Ownable.sol";
  *      (see `mintYieldTo` function)
  *
  * @author Pedro Bergamini, reviewed by Basil Gori
+ * Adapted for Syn City by Superpower Labs
  */
 contract SyndicatePoolFactory is Ownable, SyndicateAware {
   /**

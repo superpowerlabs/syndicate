@@ -3,6 +3,7 @@ pragma solidity 0.8.1;
 
 /**
  * @title Linked to SYN Marker Interface
+ *        Original title: Linked to ILV Marker Interface
  *
  * @notice Marks smart contracts which are linked to SyndicateERC20 token instance upon construction,
  *      all these smart contracts share a common syn() address getter
@@ -10,6 +11,7 @@ pragma solidity 0.8.1;
  * @notice Implementing smart contracts MUST verify that they get linked to real SyndicateERC20 instance
  *      and that syn() getter returns this very same instance address
  * @author Basil Gorin
+ * Adapted for Syn City by Superpower Labs
  */
 interface ILinkedToSYN {
   /**

@@ -10,6 +10,7 @@ import "../token/EscrowedSyndicateERC20.sol";
 
 /**
  * @title Syndicate Pool Base
+ *        Original title: Illuvium Pool Base
  *
  * @notice An abstract contract containing common logic for any pool,
  *      be it a flash pool (temporary pool like SNX) or a core pool (permanent pool like SYN/ETH or SYN pool)
@@ -28,6 +29,7 @@ import "../token/EscrowedSyndicateERC20.sol";
  *      pool weight by total pools weight (sum of all registered pools within the factory)
  *
  * @author Pedro Bergamini, reviewed by Basil Gorin
+ * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Data structure representing token holder using a pool
