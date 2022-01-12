@@ -23,7 +23,11 @@ contract SynSwapper is AccessControl {
   address public syn;
   address public ssyn;
 
-  constructor(address _superAdmin, address _syn, address _ssyn) AccessControl(_superAdmin) {
+  constructor(
+    address _superAdmin,
+    address _syn,
+    address _ssyn
+  ) AccessControl(_superAdmin) {
     syn = _syn;
     ssyn = _ssyn;
   }
@@ -38,5 +42,4 @@ contract SynSwapper is AccessControl {
     EscrowedSyndicateERC20(ssyn).burn(recipient, amount);
     SyndicateERC20(syn).mint(recipient, amount);
   }
-
 }
