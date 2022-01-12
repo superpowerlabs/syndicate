@@ -5,7 +5,7 @@ import "./SyndicateERC20.sol";
 import "./SyntheticSyndicateERC20.sol";
 import "../utils/AccessControl.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 /**
  * @title Syn Swapper

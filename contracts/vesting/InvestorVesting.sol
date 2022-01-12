@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../token/SyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract InvestorVesting is Ownable {
   event TGETriggered(uint256 nowTimestamp, uint256 timestampTGE);

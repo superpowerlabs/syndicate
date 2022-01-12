@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../token/SyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract AdvisorsVesting is Ownable {
   event GrantTerminated(address grantee, uint256 when);

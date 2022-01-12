@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../token/SyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract TeamVesting is Ownable {
   uint256 public startTime;
