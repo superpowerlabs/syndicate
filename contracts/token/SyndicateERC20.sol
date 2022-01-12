@@ -295,7 +295,13 @@ contract SyndicateERC20 is AccessControl {
    */
   uint32 public constant ROLE_ERC20_SENDER = 0x0008_0000;
 
-  uint32 public constant ROLE_WHITE_LISTED_SPENDER = 0x0010_0000;
+  uint32 public constant ROLE_WHITE_LISTED_SPENDER = 0x0016_0000;
+
+  /**
+ * @notice White listed treasury can swap sSYN to receive SYN
+ * @dev Role ROLE_TREASURY can get SYN in exchange for sSYN
+ */
+  uint32 public constant ROLE_TREASURY = 0x0032_0000;
 
   /**
    * @dev Magic value to be returned by ERC20Receiver upon successful reception of token(s)

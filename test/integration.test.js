@@ -17,7 +17,7 @@ describe("Integration Test", function () {
   it("should verify that the entire process works", async function () {
 
     const maxTotalSupply = 10000000000; // 10 billions
-    let [deployer, fundOwner, superAdmin, user1, user2, marketplace] = await ethers.getSigners();
+    let [deployer, fundOwner, superAdmin, user1, user2, marketplace, treasury] = await ethers.getSigners();
     const SSYN = await ethers.getContractFactory("EscrowedSyndicateERC20");
     const ssyn = await SSYN.deploy(superAdmin.address);
     const SYN = await ethers.getContractFactory("SyndicateERC20");
@@ -105,12 +105,22 @@ describe("Integration Test", function () {
     expect((await syn.balanceOf(user2.address)) / 1e18).equal(5000);
 
     // swaps
+
+    // allows treasury to be the receiver of the swap
+    await ssyn.connect(superAdmin).updateRole(treasury.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
+    await syn.connect(superAdmin).updateRole(treasury.address, await syn.ROLE_TREASURY());
+
+    // allows swapper to do the swap
     await ssyn.connect(superAdmin).updateRole(swapper.address, await ssyn.ROLE_TOKEN_DESTROYER());
     await syn.connect(superAdmin).updateRole(swapper.address, await syn.ROLE_TOKEN_CREATOR());
-    let ssynAmount = await ssyn.balanceOf(marketplace.address)
-    await swapper.connect(fundOwner).swap(marketplace.address, ssynAmount)
-    expect((await ssyn.balanceOf(marketplace.address)) / 1e18).equal(0);
-    expect((await syn.balanceOf(marketplace.address)) / 1e18).equal(1000);
+
+    await ssyn.connect(marketplace).transfer(treasury.address, normalize(1000));
+
+    let ssynAmount = await ssyn.balanceOf(treasury.address)
+    expect(ssynAmount/ 1e18).equal(1000);
+    await swapper.connect(fundOwner).swap(treasury.address, ssynAmount)
+    expect((await ssyn.balanceOf(treasury.address)) / 1e18).equal(0);
+    expect((await syn.balanceOf(treasury.address)) / 1e18).equal(1000);
 
   })
 
