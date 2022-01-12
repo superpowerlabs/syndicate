@@ -32,7 +32,7 @@ async function main() {
   const poolFactory = await PoolFactory.deploy(
       synAddress,
       ssynAddress,
-      ethers.utils.parseEther(SYN_PER_BLOCK),
+      ethers.BigNumber.from(SYN_PER_BLOCK),
       ethers.BigNumber.from(BLOCK_PER_UPDATE),
       blockNumberFactoryConstructor,
       blockNumberFactoryConstructor + parseInt(BLOCK_MULTIPLIER)
@@ -52,7 +52,7 @@ To verify SyndicatePoolFactory source code:
       ${poolFactory.address} \\
       ${synAddress} \\
       ${ssynAddress} \\
-      ${ethers.utils.parseEther(SYN_PER_BLOCK).toString()} \\
+      ${ethers.BigNumber.from(SYN_PER_BLOCK).toString()} \\
       ${ethers.BigNumber.from(BLOCK_PER_UPDATE).toString()} \\
       ${blockNumberFactoryConstructor} \\
       ${blockNumberFactoryConstructor + parseInt(BLOCK_MULTIPLIER)} \\
