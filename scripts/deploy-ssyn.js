@@ -14,7 +14,7 @@ async function main() {
       : chainId == 42 ? 'kovan'
           : 'localhost'
 
-  const superAdmin = chainId === '1337'
+  const superAdmin = chainId === 1337
       ? localSuperAdmin.address
       : process.env.SUPER_ADMIN
 

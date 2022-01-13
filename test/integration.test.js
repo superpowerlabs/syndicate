@@ -1,5 +1,24 @@
 const {expect, assert} = require("chai")
 
+async function assertThrowsMessage(promise, message) {
+  const notThrew = 'It did not throw'
+  try {
+    await promise
+    throw new Error(notThrew)
+  } catch (e) {
+    const isTrue = e.message.indexOf(message) > -1
+    if (!isTrue) {
+      console.error('Expected:', message)
+      console.error('Received:', e.message)
+      if (e.message !== notThrew) {
+        console.error()
+        console.error(e)
+      }
+    }
+    assert.isTrue(isTrue)
+  }
+}
+
 describe("Integration Test", function () {
   async function deployContract(name, ...args) {
     console.log(name, " being deployed");
@@ -25,6 +44,12 @@ describe("Integration Test", function () {
 
     const Swapper = await ethers.getContractFactory("SynSwapper");
     const swapper = await Swapper.deploy(superAdmin.address, syn.address, ssyn.address);
+
+    // swaps
+
+    // allows swapper to do the swap
+    await ssyn.connect(superAdmin).updateRole(swapper.address, await ssyn.ROLE_TOKEN_DESTROYER());
+    await syn.connect(superAdmin).updateRole(swapper.address, await syn.ROLE_TOKEN_CREATOR());
 
     let features = (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
         (await syn.FEATURE_TRANSFERS()) +
@@ -81,6 +106,10 @@ describe("Integration Test", function () {
     let unstakeTx = await corePool.connect(user1).unstake(0, normalize(500), true);
     expect((await syn.balanceOf(user1.address)) / 1e18).equal(18500);
     expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(5939.9970299999995);
+
+    await assertThrowsMessage(swapper.connect(user1).swap(await ssyn.balanceOf(user1.address)),
+        'SYN: not a treasury')
+
     await corePool.connect(user1).processRewards(true);
     await syn.connect(fundOwner).delegate(fundOwner.address);
     expect((await syn.balanceOf(fundOwner.address)) / 1e18).equal(6999980000);
@@ -94,31 +123,32 @@ describe("Integration Test", function () {
     await ssyn.connect(user1).transfer(marketplace.address, normalize(1000));
     expect((await ssyn.balanceOf(marketplace.address)) / 1e18).equal(1000);
 
+    await assertThrowsMessage(swapper.connect(marketplace).swap(await ssyn.balanceOf(marketplace.address)),
+        'SYN: not a treasury')
+
     features =
         (await syn.FEATURE_TRANSFERS()) + (await syn.FEATURE_UNSAFE_TRANSFERS() + (await syn.FEATURE_DELEGATIONS())
-            + (await syn.FEATURE_DELEGATIONS_ON_BEHALF()));
+            + (await syn.FEATURE_DELEGATIONS_ON_BEHALF()) + (await syn.ROLE_TREASURY()));
     await syn.connect(superAdmin).updateFeatures(features)
+
     await expect(syn.connect(user1).approve(marketplace.address, normalize(5000))).revertedWith("SYN: spender not allowed");
     await syn.connect(superAdmin).updateRole(marketplace.address, await syn.ROLE_WHITE_LISTED_SPENDER());
+
     await syn.connect(user1).approve(marketplace.address, normalize(5000));
     await syn.connect(marketplace).transferFrom(user1.address, user2.address, normalize(5000));
     expect((await syn.balanceOf(user2.address)) / 1e18).equal(5000);
 
-    // swaps
-
     // allows treasury to be the receiver of the swap
     await ssyn.connect(superAdmin).updateRole(treasury.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
-    await syn.connect(superAdmin).updateRole(treasury.address, await syn.ROLE_TREASURY());
-
-    // allows swapper to do the swap
-    await ssyn.connect(superAdmin).updateRole(swapper.address, await ssyn.ROLE_TOKEN_DESTROYER());
-    await syn.connect(superAdmin).updateRole(swapper.address, await syn.ROLE_TOKEN_CREATOR());
 
     await ssyn.connect(marketplace).transfer(treasury.address, normalize(1000));
-
     let ssynAmount = await ssyn.balanceOf(treasury.address)
     expect(ssynAmount/ 1e18).equal(1000);
-    await swapper.connect(superAdmin).swap(treasury.address, ssynAmount)
+
+    await syn.connect(superAdmin).updateRole(treasury.address, await syn.ROLE_TREASURY());
+
+    await swapper.connect(treasury).swap(ssynAmount)
+
     expect((await ssyn.balanceOf(treasury.address)) / 1e18).equal(0);
     expect((await syn.balanceOf(treasury.address)) / 1e18).equal(1000);
 

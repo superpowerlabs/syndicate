@@ -11,11 +11,11 @@ async function main() {
   let [, localTokenOwner, localSuperAdmin] = await ethers.getSigners();
   // let tx;
 
-  const tokenOwner = chainId === '1337'
+  const tokenOwner = chainId === 1337
       ? localTokenOwner.address
       : process.env.TOKEN_OWNER
 
-  const superAdmin = chainId === '1337'
+  const superAdmin = chainId === 1337
       ? localSuperAdmin.address
       : process.env.SUPER_ADMIN
 
