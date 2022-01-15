@@ -67,12 +67,6 @@ contract SyndicateCorePool is SyndicatePoolBase {
    */
   event VaultUpdated(address indexed _by, address _fromVal, address _toVal);
 
-  modifier onlyFactoryOwner() {
-    // verify function is executed by the factory owner
-    require(factory.owner() == msg.sender, "CorePool: access denied");
-    _;
-  }
-
   /**
    * @dev Creates/deploys an instance of the core pool
    *
