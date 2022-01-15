@@ -36,8 +36,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
   uint256 public minLockTime = 16 weeks;
 
-  bool public paused;
-
   IMigrator public migrator;
 
   /// @dev Token holder storage, maps token holder address to their data record
@@ -211,7 +209,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   }
 
   function migrate() external {
-    require(paused, "Pause contract first");
+    require(weight == 0, "disable pool first");
     User storage user = users[msg.sender];
     require(user.tokenAmount !=0, "No token to migrate");
     migrator.receiveDeposit(user);
