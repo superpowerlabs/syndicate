@@ -153,8 +153,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     _;
   }
 
-  modifier unPaused() {
-    require(paused = false, "contract paused");
+  modifier poolAlive() {
+    require(weight > 0, "pool disabled");
     _;
   }
 
@@ -204,14 +204,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // init the dependent internal state variables
     lastYieldDistribution = _initBlock;
-  }
-
-  function pause() external onlyFactoryOwner {
-    paused = true;
-  }
-
-  function unpause() external onlyFactoryOwner {
-    paused = false;
   }
 
   function setMigrator(IMigrator _migrator) external onlyFactoryOwner {
@@ -455,7 +447,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint64 _lockUntil,
     bool _useSSYN,
     bool _isYield
-  ) internal virtual unPaused {
+  ) internal virtual poolAlive {
     // validate the inputs
     require(_amount > 0, "SyndicatePoolBase: zero amount");
     // we need to the limit of max locking time to limit the yield bonus
@@ -532,7 +524,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint256 _amount,
     bool _useSSYN
-  ) internal virtual unPaused {
+  ) internal virtual poolAlive {
     // verify an amount is set
     require(_amount > 0, "zero amount");
 
@@ -593,7 +585,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Updates smart contract state (`yieldRewardsPerWeight`, `lastYieldDistribution`),
    *      updates factory state via `updateSYNPerBlock`
    */
-  function _sync() internal virtual unPaused {
+  function _sync() internal virtual poolAlive {
     // update SYN per block value in factory if required
     if (factory.shouldUpdateRatio()) {
       factory.updateSYNPerBlock();
@@ -640,7 +632,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     address _staker,
     bool _useSSYN,
     bool _withUpdate
-  ) internal virtual unPaused returns (uint256 pendingYield) {
+  ) internal virtual poolAlive returns (uint256 pendingYield) {
     // update smart contract state if required
     if (_withUpdate) {
       _sync();
@@ -707,7 +699,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     address _staker,
     uint256 _depositId,
     uint64 _lockedUntil
-  ) internal unPaused {
+  ) internal poolAlive {
     // validate the input time
     require(_lockedUntil > now256(), "lock should be in the future");
 
