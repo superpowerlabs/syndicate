@@ -57,7 +57,8 @@ To verify SyndicateERC20 source code:
       --network ${network} \\
       ${syn.address} \\
       ${tokenOwner} \\
-      ${process.env.MAX_TOTAL_SUPPLY}
+      ${process.env.MAX_TOTAL_SUPPLY} \\
+      ${superAdmin} 
       
 `)
 
