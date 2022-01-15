@@ -10,6 +10,10 @@ require("@nomiclabs/hardhat-etherscan");
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+if (process.env.GAS_REPORT === 'yes') {
+  require("hardhat-gas-reporter");
+}
+
 const envJson = require('./.env.json')
 
 /**
@@ -47,6 +51,10 @@ module.exports = {
       accounts: [envJson.kovan.privateKey],
       chainId: 42,
     },
+  },
+  gasReporter: {
+    currency: 'USD',
+    coinmarketcap: process.env.coinmarketcap
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_KEY
