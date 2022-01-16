@@ -33,7 +33,6 @@ import "../interfaces/IMigrator.sol";
  * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
-
   uint256 public minLockTime = 16 weeks;
 
   IMigrator public migrator;
@@ -185,7 +184,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // verify sSYN instance supplied
     require(
-       SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
+      SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
       "unexpected sSYN TOKEN_UID"
     );
     // verify SyndicatePoolFactory instance supplied
@@ -205,25 +204,25 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   }
 
   function setMigrator(IMigrator _migrator) external onlyFactoryOwner {
+    require(address(_migrator) != address(0), "migrator cannot be 0x0");
     migrator = _migrator;
   }
 
   function migrate() external {
     require(weight == 0, "disable pool first");
-    require(address(migrator) != address (0), "migrator not set");
-    User storage user = users[msg.sender];
-    require(user.tokenAmount !=0, "No token to migrate");
-    migrator.receiveDeposit(user);
+    require(address(migrator) != address(0), "migrator not set");
+    User memory user = users[msg.sender];
+    require(user.tokenAmount != 0, "no tokens to migrate");
+    migrator.receiveDeposits(msg.sender, user);
     uint256 tokenToMigrate;
     for (uint256 i = 0; i < user.deposits.length; i++) {
-      if (! user.deposits[i].isYield) {
+      if (!user.deposits[i].isYield) {
         tokenToMigrate += user.deposits[i].tokenAmount;
       }
     }
     SyndicateERC20(syn).transfer(address(migrator), tokenToMigrate);
     delete user.tokenAmount;
   }
-
 
   /**
    * @notice Calculates current yield rewards value available for address specified
@@ -797,7 +796,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   // solhint-disable-next-line
   function mintSSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
-     SyntheticSyndicateERC20(ssyn).mint(_to, _value);
+    SyntheticSyndicateERC20(ssyn).mint(_to, _value);
   }
 
   /**
