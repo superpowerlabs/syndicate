@@ -210,6 +210,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
   function migrate() external {
     require(weight == 0, "disable pool first");
+    require(address(migrator) != address (0), "migrator not set");
     User storage user = users[msg.sender];
     require(user.tokenAmount !=0, "No token to migrate");
     migrator.receiveDeposit(user);
