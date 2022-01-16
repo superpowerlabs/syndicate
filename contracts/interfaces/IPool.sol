@@ -30,6 +30,20 @@ interface IPool is ILinkedToSYN {
     bool isYield;
   }
 
+  /// @dev Data structure representing token holder using a pool
+  struct User {
+    // @dev Total staked amount
+    uint256 tokenAmount;
+    // @dev Total weight
+    uint256 totalWeight;
+    // @dev Auxiliary variable for yield calculation
+    uint256 subYieldRewards;
+    // @dev Auxiliary variable for vault rewards calculation
+    uint256 subVaultRewards;
+    // @dev An array of holder's deposits
+    Deposit[] deposits;
+  }
+
   // for the rest of the functions see Soldoc in SyndicatePoolBase
 
   function ssyn() external view returns (address);

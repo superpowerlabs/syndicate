@@ -7,6 +7,7 @@ import "./ReentrancyGuard.sol";
 import "./SyndicatePoolFactory.sol";
 import "../utils/SafeERC20.sol";
 import "../token/SyntheticSyndicateERC20.sol";
+import "../interfaces/IMigrator.sol";
 
 /**
  * @title Syndicate Pool Base
@@ -32,21 +33,10 @@ import "../token/SyntheticSyndicateERC20.sol";
  * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
-  /// @dev Data structure representing token holder using a pool
-  struct User {
-    // @dev Total staked amount
-    uint256 tokenAmount;
-    // @dev Total weight
-    uint256 totalWeight;
-    // @dev Auxiliary variable for yield calculation
-    uint256 subYieldRewards;
-    // @dev Auxiliary variable for vault rewards calculation
-    uint256 subVaultRewards;
-    // @dev An array of holder's deposits
-    Deposit[] deposits;
-  }
 
   uint256 public minLockTime = 16 weeks;
+
+  IMigrator public migrator;
 
   /// @dev Token holder storage, maps token holder address to their data record
   mapping(address => User) public users;
@@ -155,6 +145,17 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    */
   event PoolWeightUpdated(address indexed _by, uint32 _fromVal, uint32 _toVal);
 
+  modifier onlyFactoryOwner() {
+    // verify function is executed by the factory owner
+    require(factory.owner() == msg.sender, "access denied");
+    _;
+  }
+
+  modifier poolAlive() {
+    require(weight > 0, "pool disabled");
+    _;
+  }
+
   /**
    * @dev Overridden in sub-contracts to construct the pool
    *
@@ -202,6 +203,27 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // init the dependent internal state variables
     lastYieldDistribution = _initBlock;
   }
+
+  function setMigrator(IMigrator _migrator) external onlyFactoryOwner {
+    migrator = _migrator;
+  }
+
+  function migrate() external {
+    require(weight == 0, "disable pool first");
+    require(address(migrator) != address (0), "migrator not set");
+    User storage user = users[msg.sender];
+    require(user.tokenAmount !=0, "No token to migrate");
+    migrator.receiveDeposit(user);
+    uint256 tokenToMigrate;
+    for (uint256 i = 0; i < user.deposits.length; i++) {
+      if (! user.deposits[i].isYield) {
+        tokenToMigrate += user.deposits[i].tokenAmount;
+      }
+    }
+    SyndicateERC20(syn).transfer(address(migrator), tokenToMigrate);
+    delete user.tokenAmount;
+  }
+
 
   /**
    * @notice Calculates current yield rewards value available for address specified
@@ -424,7 +446,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint64 _lockUntil,
     bool _useSSYN,
     bool _isYield
-  ) internal virtual {
+  ) internal virtual poolAlive {
     // validate the inputs
     require(_amount > 0, "SyndicatePoolBase: zero amount");
     // we need to the limit of max locking time to limit the yield bonus
@@ -501,7 +523,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint256 _amount,
     bool _useSSYN
-  ) internal virtual {
+  ) internal virtual poolAlive {
     // verify an amount is set
     require(_amount > 0, "zero amount");
 
@@ -562,7 +584,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Updates smart contract state (`yieldRewardsPerWeight`, `lastYieldDistribution`),
    *      updates factory state via `updateSYNPerBlock`
    */
-  function _sync() internal virtual {
+  function _sync() internal virtual poolAlive {
     // update SYN per block value in factory if required
     if (factory.shouldUpdateRatio()) {
       factory.updateSYNPerBlock();
@@ -609,7 +631,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     address _staker,
     bool _useSSYN,
     bool _withUpdate
-  ) internal virtual returns (uint256 pendingYield) {
+  ) internal virtual poolAlive returns (uint256 pendingYield) {
     // update smart contract state if required
     if (_withUpdate) {
       _sync();
@@ -676,7 +698,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     address _staker,
     uint256 _depositId,
     uint64 _lockedUntil
-  ) internal {
+  ) internal poolAlive {
     // validate the input time
     require(_lockedUntil > now256(), "lock should be in the future");
 
