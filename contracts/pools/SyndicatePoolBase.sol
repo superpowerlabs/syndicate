@@ -41,7 +41,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   mapping(address => User) public users;
 
   /// @dev Link to sSYN ERC20 Token  SyntheticSyndicateERC20 instance
-  address public immutable override ssyn;
+  address public immutable ssyn;
 
   /// @dev Link to the pool factory SyndicatePoolFactory instance
   SyndicatePoolFactory public immutable factory;
@@ -53,15 +53,17 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   uint32 public override weight;
 
   /// @dev Block number of the last yield distribution event
-  uint64 public override lastYieldDistribution;
+  uint64 public lastYieldDistribution;
 
   /// @dev Used to calculate yield rewards
   /// @dev This value is different from "reward per token" used in locked pool
   /// @dev Note: stakes are different in duration and "weight" reflects that
-  uint256 public override yieldRewardsPerWeight;
+  uint256 public yieldRewardsPerWeight;
 
   /// @dev Used to calculate yield rewards, keeps track of the tokens weight locked in staking
-  uint256 public override usersLockingWeight;
+  uint256 public usersLockingWeight;
+
+  uint256 public totalYieldReward;
 
   /**
    * @dev Stake weight is proportional to deposit amount and time locked, precisely
@@ -231,7 +233,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _staker an address to calculate yield rewards value for
    * @return calculated yield reward value for the given address
    */
-  function pendingYieldRewards(address _staker) external view override returns (uint256) {
+  function pendingYieldRewards(address _staker) external view returns (uint256) {
     // `newYieldRewardsPerWeight` will store stored or recalculated value for `yieldRewardsPerWeight`
     uint256 newYieldRewardsPerWeight;
 
@@ -261,7 +263,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _user an address to query balance for
    * @return total staked token balance
    */
-  function balanceOf(address _user) external view override returns (uint256) {
+  function balanceOf(address _user) external view returns (uint256) {
     // read specified user token amount and return
     return users[_user].tokenAmount;
   }
@@ -275,7 +277,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _depositId zero-indexed deposit ID for the address specified
    * @return deposit info as Deposit structure
    */
-  function getDeposit(address _user, uint256 _depositId) external view override returns (Deposit memory) {
+  function getDeposit(address _user, uint256 _depositId) external view returns (Deposit memory) {
     // read deposit at specified index and return
     return users[_user].deposits[_depositId];
   }
@@ -288,7 +290,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _user an address to query deposit length for
    * @return number of deposits for the given address
    */
-  function getDepositsLength(address _user) external view override returns (uint256) {
+  function getDepositsLength(address _user) external view returns (uint256) {
     // read deposits array length and return
     return users[_user].deposits.length;
   }
@@ -307,7 +309,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _amount,
     uint64 _lockUntil,
     bool _useSSYN
-  ) external override {
+  ) external {
     // delegate call to an internal function
     _stake(msg.sender, _amount, _lockUntil, _useSSYN, false);
   }
@@ -325,7 +327,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint256 _amount,
     bool _useSSYN
-  ) external override {
+  ) external {
     // delegate call to an internal function
     _unstake(msg.sender, _depositId, _amount, _useSSYN);
   }
@@ -363,7 +365,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev When timing conditions are not met (executed too frequently, or after factory
    *      end block), function doesn't throw and exits silently
    */
-  function sync() external override {
+  function sync() external {
     // delegate call to an internal function
     _sync();
   }
@@ -385,7 +387,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *      (poolToken is SYN token), or new pool deposit gets created together with sSYN minted
    *      when pool is not an SYN pool (poolToken is not an SYN token)
    */
-  function processRewards(bool _useSSYN) external virtual override {
+  function processRewards(bool _useSSYN) external virtual {
     // delegate call to an internal function
     _processRewards(msg.sender, _useSSYN, true);
   }
@@ -586,10 +588,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *      updates factory state via `updateSYNPerBlock`
    */
   function _sync() internal virtual poolAlive {
-    // update SYN per block value in factory if required
-    if (factory.shouldUpdateRatio()) {
-      factory.updateSYNPerBlock();
-    }
     // check bound conditions and if these are not met -
     // exit silently, without emitting an event
     uint256 endBlock = factory.endBlock();
@@ -611,6 +609,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // calculate the reward
     uint256 synReward = (blocksPassed * synPerBlock * weight) / factory.totalWeight();
+
+    totalYieldReward += synReward;
 
     // update rewards per weight and `lastYieldDistribution`
     yieldRewardsPerWeight += rewardToWeight(synReward, usersLockingWeight);

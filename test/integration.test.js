@@ -65,7 +65,6 @@ describe("Integration Test", function () {
     // deploy factory
     const poolFactory = await PoolFactory.deploy(syn.address, ssyn.address,
         normalize(990), // synPerBlock
-        91252, // blockPerUpdate, decrease reward by 3%
         await ethers.provider.getBlockNumber(),
         await ethers.provider.getBlockNumber() + 7120725);
 

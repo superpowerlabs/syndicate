@@ -59,11 +59,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    */
   uint32 public totalWeight;
 
-  /**
-   * @dev SYN/block decreases by 3% every blocks/update (set to 91252 blocks during deployment);
-   *      an update is triggered by executing `updateSYNPerBlock` public function
-   */
-  uint32 public immutable blocksPerUpdate;
 
   /**
    * @dev End block is the last block when SYN/block can be decreased;
@@ -128,7 +123,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    * @param _syn SYN ERC20 token address
    * @param _ssyn sSYN ERC20 token address
    * @param _synPerBlock initial SYN/block value for rewards
-   * @param _blocksPerUpdate how frequently the rewards gets updated (decreased by 3%), blocks
    * @param _initBlock block number to measure _blocksPerUpdate from
    * @param _endBlock block number when farming stops and rewards cannot be updated anymore
    */
@@ -136,14 +130,12 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     address _syn,
     address _ssyn,
     uint192 _synPerBlock,
-    uint32 _blocksPerUpdate,
     uint32 _initBlock,
     uint32 _endBlock
   ) SyndicateAware(_syn) {
     // verify the inputs are set
     require(_ssyn != address(0), "sSYN address not set");
     require(_synPerBlock > 0, "SYN/block not set");
-    require(_blocksPerUpdate > 0, "blocks/update not set");
     require(_initBlock > 0, "init block not set");
     require(_endBlock > _initBlock, "invalid end block: must be greater than init block");
 
@@ -156,7 +148,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     // save the inputs into internal state variables
     ssyn = _ssyn;
     synPerBlock = _synPerBlock;
-    blocksPerUpdate = _blocksPerUpdate;
     lastRatioUpdate = _initBlock;
     endBlock = _endBlock;
   }
@@ -196,23 +187,6 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
 
     // create the in-memory structure and return it
     return PoolData({poolToken: poolToken, poolAddress: poolAddr, weight: weight, isFlashPool: isFlashPool});
-  }
-
-  /**
-   * @dev Verifies if `blocksPerUpdate` has passed since last SYN/block
-   *      ratio update and if SYN/block reward can be decreased by 3%
-   *
-   * @return true if enough time has passed and `updateSYNPerBlock` can be executed
-   */
-  function shouldUpdateRatio() public view returns (bool) {
-    // if yield farming period has ended
-    if (blockNumber() > endBlock) {
-      // SYN/block reward cannot be updated anymore
-      return false;
-    }
-
-    // check if blocks/update (91252 blocks) have passed since last update
-    return blockNumber() >= lastRatioUpdate + blocksPerUpdate;
   }
 
   /**
@@ -264,19 +238,10 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
   }
 
   /**
-   * @notice Decreases SYN/block reward by 3%, can be executed
-   *      no more than once per `blocksPerUpdate` blocks
+   * @notice Set SYN/block reward
    */
-  function updateSYNPerBlock() external {
-    // checks if ratio can be updated i.e. if blocks/update (91252 blocks) have passed
-    require(shouldUpdateRatio(), "too frequent");
-
-    // decreases SYN/block reward by 3%
-    synPerBlock = (synPerBlock * 97) / 100;
-
-    // set current block as the last ratio update block
-    lastRatioUpdate = uint32(blockNumber());
-
+  function updateSYNPerBlock(uint256 _synPerBlock) external onlyOwner {
+    synPerBlock = uint192(_synPerBlock);
     // emit an event
     emit SynRatioUpdated(msg.sender, synPerBlock);
   }
