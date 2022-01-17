@@ -211,17 +211,18 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   function migrate() external {
     require(weight == 0, "disable pool first");
     require(address(migrator) != address(0), "migrator not set");
-    User memory user = users[msg.sender];
+    User storage user = users[msg.sender];
     require(user.tokenAmount != 0, "no tokens to migrate");
     migrator.receiveDeposits(msg.sender, user);
     uint256 tokenToMigrate;
-    for (uint256 i = 0; i < user.deposits.length; i++) {
-      if (!user.deposits[i].isYield) {
-        tokenToMigrate += user.deposits[i].tokenAmount;
+    for (uint256 i = user.deposits.length ; i > 0; i--) {
+      if (!user.deposits[i-1].isYield) {
+        tokenToMigrate += user.deposits[i-1].tokenAmount;
       }
+      user.deposits.pop();
     }
     SyndicateERC20(syn).transfer(address(migrator), tokenToMigrate);
-    delete user.tokenAmount;
+    delete users[msg.sender];
   }
 
   /**
@@ -404,8 +405,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // emit an event logging old and new weight values
     emit PoolWeightUpdated(msg.sender, weight, _weight);
 
+
     // set the new weight value
     weight = _weight;
+    console.log("weight in factory %s", weight);
   }
 
   /**

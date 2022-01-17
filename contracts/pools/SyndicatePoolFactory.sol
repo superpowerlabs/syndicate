@@ -7,6 +7,8 @@ import "./SyndicateCorePool.sol";
 import "../token/SyntheticSyndicateERC20.sol";
 import "../utils/Ownable.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title Syndicate Pool Factory
  *        Original title: Illuvium Pool Factory

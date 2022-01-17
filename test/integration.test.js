@@ -152,6 +152,47 @@ describe("Integration Test", function () {
     expect((await ssyn.balanceOf(treasury.address)) / 1e18).equal(0);
     expect((await syn.balanceOf(treasury.address)) / 1e18).equal(1000);
 
+    // migrate the pool
+
+    let poolUser = await corePool.users(user1.address)
+    let deposit1 = await corePool.getDeposit(user1.address, 0)
+    let deposit2 = await corePool.getDeposit(user1.address, 1)
+    expect(poolUser.tokenAmount).equal('1500000000000000000000')
+    expect(deposit1.tokenAmount).equal('500000000000000000000')
+    expect(deposit2.tokenAmount).equal('1000000000000000000000')
+
+    let initBlockNumber = (await ethers.provider.getBlockNumber()) + 2
+    const CorePoolV2 = await ethers.getContractFactory("CorePoolV2Mock");
+    const corePoolV2 = await CorePoolV2.deploy(
+        syn.address, ssyn.address, poolFactory.address, syn.address, initBlockNumber, 200);
+
+    // disable pool
+    await poolFactory.changePoolWeight(corePool.address, 0)
+
+    expect(await corePool.weight()).equal(0)
+
+    // set up migrator
+    await corePool.setMigrator(corePoolV2.address)
+    // migrate
+    await corePool.connect(user1).migrate()
+    expect(await syn.balanceOf(corePoolV2.address)).equal('1500000000000000000000')
+
+
+    // expect(await corePool.getDepositsLength(user1.address)).equal(0)
+    // expect((await corePool.users(user1.address)).tokenAmount).equal(0)
+    //
+    // poolUser = await corePoolV2.users(user1.address)
+    // deposit1 = await corePoolV2.getDeposit(user1.address, 0)
+    // deposit2 = await corePoolV2.getDeposit(user1.address, 1)
+    // expect(poolUser.tokenAmount).equal('1500000000000000000000')
+    // expect(deposit1.tokenAmount).equal('500000000000000000000')
+    // expect(deposit2.tokenAmount).equal('1000000000000000000000')
+
+
+
+
+
+
   })
 
 })
