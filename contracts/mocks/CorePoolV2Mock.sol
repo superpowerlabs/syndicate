@@ -23,7 +23,7 @@ contract CorePoolV2Mock is SyndicateCorePool, IMigrator {
     user.totalWeight = _user.totalWeight;
     user.subYieldRewards = _user.subYieldRewards;
     user.subVaultRewards = _user.subVaultRewards;
-    for (uint i=0;i<_user.deposits.length;i++) {
+    for (uint256 i = 0; i < _user.deposits.length; i++) {
       user.deposits.push(_user.deposits[i]);
     }
   }

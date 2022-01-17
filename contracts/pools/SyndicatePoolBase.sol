@@ -215,9 +215,9 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     require(user.tokenAmount != 0, "no tokens to migrate");
     migrator.receiveDeposits(msg.sender, user);
     uint256 tokenToMigrate;
-    for (uint256 i = user.deposits.length ; i > 0; i--) {
-      if (!user.deposits[i-1].isYield) {
-        tokenToMigrate += user.deposits[i-1].tokenAmount;
+    for (uint256 i = user.deposits.length; i > 0; i--) {
+      if (!user.deposits[i - 1].isYield) {
+        tokenToMigrate += user.deposits[i - 1].tokenAmount;
       }
       user.deposits.pop();
     }
@@ -404,7 +404,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // emit an event logging old and new weight values
     emit PoolWeightUpdated(msg.sender, weight, _weight);
-
 
     // set the new weight value
     weight = _weight;
