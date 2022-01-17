@@ -281,6 +281,12 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     emit SynRatioUpdated(msg.sender, synPerBlock);
   }
 
+  function overrideSYNPerBlock(uint192 _synPerBlock) external onlyOwner{
+    synPerBlock = _synPerBlock;
+    // emit an event
+    emit SynRatioUpdated(msg.sender, synPerBlock);
+  }
+
   /**
    * @dev Mints SYN tokens; executed by SYN Pool only
    *
