@@ -63,6 +63,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Used to calculate yield rewards, keeps track of the tokens weight locked in staking
   uint256 public override usersLockingWeight;
 
+  uint256 public totalYieldReward;
+
   /**
    * @dev Stake weight is proportional to deposit amount and time locked, precisely
    *      "deposit amount wei multiplied by (fraction of the year locked plus one)"
@@ -611,6 +613,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // calculate the reward
     uint256 synReward = (blocksPassed * synPerBlock * weight) / factory.totalWeight();
+
+    totalYieldReward += synReward;
 
     // update rewards per weight and `lastYieldDistribution`
     yieldRewardsPerWeight += rewardToWeight(synReward, usersLockingWeight);
