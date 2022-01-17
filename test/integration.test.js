@@ -175,22 +175,18 @@ describe("Integration Test", function () {
     await corePool.setMigrator(corePoolV2.address)
     // migrate
     await corePool.connect(user1).migrate()
+    // corePoolV2's SYN balance increased
     expect(await syn.balanceOf(corePoolV2.address)).equal('1500000000000000000000')
-
-
-    // expect(await corePool.getDepositsLength(user1.address)).equal(0)
-    // expect((await corePool.users(user1.address)).tokenAmount).equal(0)
-    //
-    // poolUser = await corePoolV2.users(user1.address)
-    // deposit1 = await corePoolV2.getDeposit(user1.address, 0)
-    // deposit2 = await corePoolV2.getDeposit(user1.address, 1)
-    // expect(poolUser.tokenAmount).equal('1500000000000000000000')
-    // expect(deposit1.tokenAmount).equal('500000000000000000000')
-    // expect(deposit2.tokenAmount).equal('1000000000000000000000')
-
-
-
-
+    // no more deposits on corePool V1
+    expect(await corePool.getDepositsLength(user1.address)).equal(0)
+    expect((await corePool.users(user1.address)).tokenAmount).equal(0)
+    // user and deposits correctly set on corePoolV2
+    poolUser = await corePoolV2.users(user1.address)
+    deposit1 = await corePoolV2.getDeposit(user1.address, 0)
+    deposit2 = await corePoolV2.getDeposit(user1.address, 1)
+    expect(poolUser.tokenAmount).equal('1500000000000000000000')
+    expect(deposit1.tokenAmount).equal('500000000000000000000')
+    expect(deposit2.tokenAmount).equal('1000000000000000000000')
 
 
   })
