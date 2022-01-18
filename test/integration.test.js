@@ -188,7 +188,11 @@ describe("Integration Test", function () {
     expect(deposit1.tokenAmount).equal('500000000000000000000')
     expect(deposit2.tokenAmount).equal('1000000000000000000000')
 
+    expect(await syn.symbol()).equal('SYN')
+    await assertThrowsMessage(syn.connect(user1).updateSymbol('SNX'), 'insufficient privileges')
 
+    await syn.connect(superAdmin).updateSymbol('SNX')
+    expect(await syn.symbol()).equal('SNX')
   })
 
 })
