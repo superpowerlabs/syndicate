@@ -421,6 +421,7 @@ contract SyndicateERC20 is AccessControl {
    *
    * @param _initialHolder owner of the initial token supply
    * @param _maxTotalSupply max token supply without decimals
+   * @param _superAdmin the contract admin (Gnosis Safe 0x8e75AEe46961019A66A88670ec18f022B8ef815E)
    */
   constructor(
     address _initialHolder,
