@@ -19,7 +19,7 @@ import "./ERC20Receiver.sol";
  *      - Decimals: 18
  *      - Initial token supply: 9,000,000,000 SYNR
  *      - Maximum final token supply: 10,000,000,000 SYNR
- *          - Up to 300,000,000 SYNR may get minted in 3 years period via yield farming
+ *          - Up to 1,000,000,000 SYNR may get minted in 3 years period via yield farming
  *      - Mintable: total supply may increase
  *      - Burnable: total supply may decrease
  *
