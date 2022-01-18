@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import "../utils/ERC20.sol";
 import "../utils/AccessControl.sol";
 
-contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), AccessControl {
+contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYNR"), AccessControl {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
@@ -26,7 +26,7 @@ contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), 
    * @param amount number of tokens to be minted.
    */
   function mint(address recipient, uint256 amount) external {
-    require(isSenderInRole(ROLE_TOKEN_CREATOR), "sSYN: insufficient privileges (ROLE_TOKEN_CREATOR required)");
+    require(isSenderInRole(ROLE_TOKEN_CREATOR), "sSYNR: insufficient privileges (ROLE_TOKEN_CREATOR required)");
     _mint(recipient, amount);
   }
 
@@ -44,8 +44,8 @@ contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), 
    * @param amount number of tokens to be burned
    */
   function burn(address recipient, uint256 amount) external {
-    require(isSenderInRole(ROLE_TOKEN_DESTROYER), "sSYN: insufficient privileges (ROLE_TOKEN_DESTROYER required)");
-    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
+    require(isSenderInRole(ROLE_TOKEN_DESTROYER), "sSYNR: insufficient privileges (ROLE_TOKEN_DESTROYER required)");
+    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYNR: Non Allowed Receiver");
     _burn(recipient, amount);
   }
 
@@ -54,7 +54,7 @@ contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYN"), 
     address recipient,
     uint256 amount
   ) internal virtual override {
-    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYN: Non Allowed Receiver");
+    require(isOperatorInRole(recipient, ROLE_WHITE_LISTED_RECEIVER), "sSYNR: Non Allowed Receiver");
     super._transfer(sender, recipient, amount);
   }
 }

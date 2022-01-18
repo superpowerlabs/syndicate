@@ -6,7 +6,7 @@ import "../utils/AccessControl.sol";
 import "./ERC20Receiver.sol";
 
 /**
- * @title Syndicate (SYN) ERC20 token
+ * @title Syndicate (SYNR) ERC20 token
  *        Original title: Illuvium (ILV) ERC20 token
  *
  * @notice Syndicate is a core ERC20 token powering the game.
@@ -14,12 +14,12 @@ import "./ERC20Receiver.sol";
  *      it powers up the governance protocol (Syndicate DAO) and participates in Yield Farming.
  *
  * @dev Token Summary:
- *      - Symbol: SYN
+ *      - Symbol: SYNR
  *      - Name: Syndicate
  *      - Decimals: 18
- *      - Initial token supply: 700,000,000 SYN
- *      - Maximum final token supply: 1,000,000,000 SYN
- *          - Up to 300,000,000 SYN may get minted in 3 years period via yield farming
+ *      - Initial token supply: 9,000,000,000 SYNR
+ *      - Maximum final token supply: 10,000,000,000 SYNR
+ *          - Up to 300,000,000 SYNR may get minted in 3 years period via yield farming
  *      - Mintable: total supply may increase
  *      - Burnable: total supply may decrease
  *
@@ -74,7 +74,7 @@ contract SyndicateERC20 is AccessControl {
   string public constant name = "Syndicate Token";
 
   /**
-   * @notice Symbol of the token: SYN
+   * @notice Symbol of the token: SYNR
    *
    * @notice ERC20 symbol of that token (short name)
    *
@@ -84,7 +84,7 @@ contract SyndicateERC20 is AccessControl {
    *      it returns the symbol of the token
    */
   // solhint-disable-next-line
-  string public symbol = "SYN";
+  string public symbol = "SYNR";
 
   event SymbolUpdated(string _symbol);
 
@@ -300,8 +300,8 @@ contract SyndicateERC20 is AccessControl {
   uint32 public constant ROLE_WHITE_LISTED_SPENDER = 0x0010_0000;
 
   /**
-   * @notice White listed treasury can swap sSYN to receive SYN
-   * @dev Role ROLE_TREASURY can get SYN in exchange for sSYN
+   * @notice White listed treasury can swap sSYN to receive SYNR
+   * @dev Role ROLE_TREASURY can get SYNR in exchange for sSYN
    */
   uint32 public constant ROLE_TREASURY = 0x0020_0000;
 
@@ -433,7 +433,7 @@ contract SyndicateERC20 is AccessControl {
 
     maxTotalSupply = _maxTotalSupply * 10**18;
     // mint initial supply
-    mint(_initialHolder, (maxTotalSupply * 70) / 100);
+    mint(_initialHolder, (maxTotalSupply * 9) / 10);
   }
 
   // ===== Start: ERC20/ERC223/ERC777 functions =====
@@ -637,10 +637,10 @@ contract SyndicateERC20 is AccessControl {
     // obviously, zero source address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
     // since for zero value transfer transaction succeeds otherwise
-    require(_from != address(0), "SYN: transfer from the zero address"); // Zeppelin msg
+    require(_from != address(0), "SYNR: transfer from the zero address"); // Zeppelin msg
 
     // non-zero recipient address check
-    require(_to != address(0), "SYN: transfer to the zero address"); // Zeppelin msg
+    require(_to != address(0), "SYNR: transfer to the zero address"); // Zeppelin msg
 
     // sender and recipient cannot be the same
     require(_from != _to, "sender and recipient are the same (_from = _to)");
@@ -666,7 +666,7 @@ contract SyndicateERC20 is AccessControl {
       uint256 _allowance = transferAllowances[_from][msg.sender];
 
       // verify sender has an allowance to transfer amount of tokens requested
-      require(_allowance >= _value, "SYN: transfer amount exceeds allowance"); // Zeppelin msg
+      require(_allowance >= _value, "SYNR: transfer amount exceeds allowance"); // Zeppelin msg
 
       // update allowance value on the stack
       _allowance -= _value;
@@ -682,7 +682,7 @@ contract SyndicateERC20 is AccessControl {
     }
 
     // verify sender has enough tokens to transfer on behalf
-    require(tokenBalances[_from] >= _value, "SYN: transfer amount exceeds balance"); // Zeppelin msg
+    require(tokenBalances[_from] >= _value, "SYNR: transfer amount exceeds balance"); // Zeppelin msg
 
     // perform the transfer:
     // decrease token owner (sender) balance
@@ -719,12 +719,12 @@ contract SyndicateERC20 is AccessControl {
     // non-zero spender address check - Zeppelin
     // obviously, zero spender address is a client mistake
     // it's not part of ERC20 standard but it's reasonable to fail fast
-    require(_spender != address(0), "SYN: approve to the zero address"); // Zeppelin msg
+    require(_spender != address(0), "SYNR: approve to the zero address"); // Zeppelin msg
 
     // if transfer on behave is not allowed, then approve is also not allowed, unless it's white listed
     require(
       isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF) || isOperatorInRole(_spender, ROLE_WHITE_LISTED_SPENDER),
-      "SYN: spender not allowed"
+      "SYNR: spender not allowed"
     );
 
     // read old approval value to emmit an improved event (ISBN:978-1-7281-3027-9)
@@ -808,7 +808,7 @@ contract SyndicateERC20 is AccessControl {
     require(_value > 0, "zero value approval decrease");
 
     // verify allowance decrease doesn't underflow
-    require(currentVal >= _value, "SYN: decreased allowance below zero");
+    require(currentVal >= _value, "SYNR: decreased allowance below zero");
 
     // delegate call to `approve` with the new value
     return approve(_spender, currentVal - _value);
@@ -836,7 +836,7 @@ contract SyndicateERC20 is AccessControl {
     require(isSenderInRole(ROLE_TOKEN_CREATOR), "insufficient privileges (ROLE_TOKEN_CREATOR required)");
 
     // non-zero recipient address check
-    require(_to != address(0), "SYN: mint to the zero address"); // Zeppelin msg
+    require(_to != address(0), "SYNR: mint to the zero address"); // Zeppelin msg
 
     // non-zero _value and arithmetic overflow check on the total supply
     // this check automatically secures arithmetic overflow on the individual balance
@@ -896,7 +896,7 @@ contract SyndicateERC20 is AccessControl {
         uint256 _allowance = transferAllowances[_from][msg.sender];
 
         // verify sender has an allowance to burn amount of tokens requested
-        require(_allowance >= _value, "SYN: burn amount exceeds allowance"); // Zeppelin msg
+        require(_allowance >= _value, "SYNR: burn amount exceeds allowance"); // Zeppelin msg
 
         // update allowance value on the stack
         _allowance -= _value;
@@ -920,11 +920,11 @@ contract SyndicateERC20 is AccessControl {
     require(_value != 0, "zero value burn");
 
     // non-zero source address check - Zeppelin
-    require(_from != address(0), "SYN: burn from the zero address"); // Zeppelin msg
+    require(_from != address(0), "SYNR: burn from the zero address"); // Zeppelin msg
 
     // verify `_from` address has enough tokens to destroy
     // (basically this is a arithmetic overflow check)
-    require(tokenBalances[_from] >= _value, "SYN: burn amount exceeds balance"); // Zeppelin msg
+    require(tokenBalances[_from] >= _value, "SYNR: burn amount exceeds balance"); // Zeppelin msg
 
     // perform burn:
     // decrease `_from` address balance

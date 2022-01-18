@@ -39,7 +39,7 @@ contract SynSwapper is AccessControl {
    * @param amount     The amount of token to be swapped
    */
   function swap(uint256 amount) external {
-    require(syn.isOperatorInRole(msg.sender, syn.ROLE_TREASURY()), "SYN: not a treasury");
+    require(syn.isOperatorInRole(msg.sender, syn.ROLE_TREASURY()), "SYNR: not a treasury");
     ssyn.burn(msg.sender, amount);
     syn.mint(msg.sender, amount);
   }

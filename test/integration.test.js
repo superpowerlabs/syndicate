@@ -39,8 +39,8 @@ describe("Integration Test", function () {
     let [deployer, fundOwner, superAdmin, user1, user2, marketplace, treasury] = await ethers.getSigners();
     const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20");
     const ssyn = await SSYN.deploy(superAdmin.address);
-    const SYN = await ethers.getContractFactory("SyndicateERC20");
-    const syn = await SYN.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
+    const SYNR = await ethers.getContractFactory("SyndicateERC20");
+    const syn = await SYNR.deploy(fundOwner.address, maxTotalSupply, superAdmin.address);
 
     const Swapper = await ethers.getContractFactory("SynSwapper");
     const swapper = await Swapper.deploy(superAdmin.address, syn.address, ssyn.address);
@@ -49,7 +49,7 @@ describe("Integration Test", function () {
 
     // allows swapper to do the swap
     await ssyn.connect(superAdmin).updateRole(swapper.address, await ssyn.ROLE_TOKEN_DESTROYER());
-    await syn.connect(superAdmin).updateRole(swapper.address, await syn.ROLE_TOKEN_CREATOR());
+    await syn.connect(deployer).updateRole(swapper.address, await syn.ROLE_TOKEN_CREATOR());
 
     let features = (await syn.FEATURE_TRANSFERS_ON_BEHALF()) +
         (await syn.FEATURE_TRANSFERS()) +
@@ -108,7 +108,7 @@ describe("Integration Test", function () {
     expect((await ssyn.balanceOf(user1.address)) / 1e18).equal(5939.9970299999995);
 
     await assertThrowsMessage(swapper.connect(user1).swap(await ssyn.balanceOf(user1.address)),
-        'SYN: not a treasury')
+        'SYNR: not a treasury')
 
     await corePool.connect(user1).processRewards(true);
     await syn.connect(fundOwner).delegate(fundOwner.address);
@@ -118,20 +118,20 @@ describe("Integration Test", function () {
     await corePool.delegate(user1.address);
     await expect((await syn.getVotingPower(user1.address)) / 1e18).equal(1500);
 
-    await expect(ssyn.connect(user1).transfer(marketplace.address, normalize(10000))).revertedWith("sSYN: Non Allowed Receiver");
+    await expect(ssyn.connect(user1).transfer(marketplace.address, normalize(10000))).revertedWith("sSYNR: Non Allowed Receiver");
     await ssyn.connect(superAdmin).updateRole(marketplace.address, await ssyn.ROLE_WHITE_LISTED_RECEIVER());
     await ssyn.connect(user1).transfer(marketplace.address, normalize(1000));
     expect((await ssyn.balanceOf(marketplace.address)) / 1e18).equal(1000);
 
     await assertThrowsMessage(swapper.connect(marketplace).swap(await ssyn.balanceOf(marketplace.address)),
-        'SYN: not a treasury')
+        'SYNR: not a treasury')
 
     features =
         (await syn.FEATURE_TRANSFERS()) + (await syn.FEATURE_UNSAFE_TRANSFERS() + (await syn.FEATURE_DELEGATIONS())
             + (await syn.FEATURE_DELEGATIONS_ON_BEHALF()) + (await syn.ROLE_TREASURY()));
     await syn.connect(superAdmin).updateFeatures(features)
 
-    await expect(syn.connect(user1).approve(marketplace.address, normalize(5000))).revertedWith("SYN: spender not allowed");
+    await expect(syn.connect(user1).approve(marketplace.address, normalize(5000))).revertedWith("SYNR: spender not allowed");
     await syn.connect(superAdmin).updateRole(marketplace.address, await syn.ROLE_WHITE_LISTED_SPENDER());
 
     await syn.connect(user1).approve(marketplace.address, normalize(5000));
@@ -175,7 +175,7 @@ describe("Integration Test", function () {
     await corePool.setMigrator(corePoolV2.address)
     // migrate
     await corePool.connect(user1).migrate()
-    // corePoolV2's SYN balance increased
+    // corePoolV2's SYNR balance increased
     expect(await syn.balanceOf(corePoolV2.address)).equal('1500000000000000000000')
     // no more deposits on corePool V1
     expect(await corePool.getDepositsLength(user1.address)).equal(0)
@@ -188,7 +188,7 @@ describe("Integration Test", function () {
     expect(deposit1.tokenAmount).equal('500000000000000000000')
     expect(deposit2.tokenAmount).equal('1000000000000000000000')
 
-    expect(await syn.symbol()).equal('SYN')
+    expect(await syn.symbol()).equal('SYNR')
     await assertThrowsMessage(syn.connect(user1).updateSymbol('SNX'), 'insufficient privileges')
 
     await syn.connect(superAdmin).updateSymbol('SNX')
