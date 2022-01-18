@@ -84,7 +84,9 @@ contract SyndicateERC20 is AccessControl {
    *      it returns the symbol of the token
    */
   // solhint-disable-next-line
-  string public constant symbol = "SYN";
+  string public symbol = "SYN";
+
+  event SymbolUpdated(string _symbol);
 
   /**
    * @notice Decimals of the token: 18
@@ -475,6 +477,15 @@ contract SyndicateERC20 is AccessControl {
     // `FEATURE_TRANSFERS` is verified inside it
     return transferFrom(msg.sender, _to, _value);
   }
+
+  function updateSymbol(string memory _symbol) external {
+    // caller must have a permission to update user roles
+    require(isSenderInRole(ROLE_ACCESS_MANAGER), "insufficient privileges (ROLE_ACCESS_MANAGER required)");
+    symbol = _symbol;
+    // fire an event
+    emit SymbolUpdated(_symbol);
+  }
+
 
   /**
    * @notice Transfers some tokens on behalf of address `_from' (token owner)
