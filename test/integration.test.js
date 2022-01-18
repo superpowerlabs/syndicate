@@ -112,8 +112,8 @@ describe("Integration Test", function () {
 
     await corePool.connect(user1).processRewards(true);
     await syn.connect(fundOwner).delegate(fundOwner.address);
-    expect((await syn.balanceOf(fundOwner.address)) / 1e18).equal(6999980000);
-    expect((await syn.getVotingPower(fundOwner.address)) / 1e18).equal(6999980000);
+    expect((await syn.balanceOf(fundOwner.address)) / 1e18).equal(8999980000);
+    expect((await syn.getVotingPower(fundOwner.address)) / 1e18).equal(8999980000);
     expect((await syn.getVotingPower(user1.address)) / 1e18).equal(0);
     await corePool.delegate(user1.address);
     await expect((await syn.getVotingPower(user1.address)) / 1e18).equal(1500);
