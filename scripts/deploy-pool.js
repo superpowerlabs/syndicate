@@ -23,7 +23,6 @@ async function main() {
     throw new Error('Missing parameters')
   }
 
-
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SyndicatePoolFactory')
