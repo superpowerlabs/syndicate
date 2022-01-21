@@ -11,7 +11,7 @@ contract AdvisorsVesting is Ownable {
 
   uint256 public startTime;
   uint256 public cliff;
-  address public syn;
+  address public synr;
 
   struct Grant {
     uint120 amount;
@@ -27,8 +27,8 @@ contract AdvisorsVesting is Ownable {
     _;
   }
 
-  constructor(address _syn, uint256 _cliff) {
-    syn = _syn;
+  constructor(address _synr, uint256 _cliff) {
+    synr = _synr;
     cliff = _cliff;
   }
 
@@ -41,7 +41,7 @@ contract AdvisorsVesting is Ownable {
       grantees.push(_grantees[i]);
       totalGrants += _amounts[i];
     }
-    require(SyndicateERC20(syn).balanceOf(address(this)) >= totalGrants, "AdvisorsVesting: fund missing");
+    require(SyndicateERC20(synr).balanceOf(address(this)) >= totalGrants, "AdvisorsVesting: fund missing");
     startTime = block.timestamp;
   }
 
@@ -56,7 +56,7 @@ contract AdvisorsVesting is Ownable {
       "AdvisorsVesting: not enough vested tokens"
     );
     grants[msg.sender].claimed += uint120(_amount);
-    SyndicateERC20(syn).transfer(recipient, _amount);
+    SyndicateERC20(synr).transfer(recipient, _amount);
   }
 
   function terminate(address grantee, uint256 when) external onlyOwner isGrantee(grantee) {
@@ -89,6 +89,6 @@ contract AdvisorsVesting is Ownable {
       amount += uint256(grants[msg.sender].amount - grants[msg.sender].claimed);
       grants[msg.sender].claimed = grants[msg.sender].amount;
     }
-    SyndicateERC20(syn).transfer(owner(), amount);
+    SyndicateERC20(synr).transfer(owner(), amount);
   }
 }

@@ -13,14 +13,14 @@ import "hardhat/console.sol";
  * @title Syndicate Pool Factory
  *        Original title: Illuvium Pool Factory
  *
- * @notice SYN Pool Factory manages Syndicate Yield farming pools, provides a single
+ * @notice SYNR Pool Factory manages Syndicate Yield farming pools, provides a single
  *      public interface to access the pools, provides an interface for the pools
  *      to mint yield rewards, access pool-related info, update weights, etc.
  *
  * @notice The factory is authorized (via its owner) to register new pools, change weights
  *      of the existing pools, removing the pools (by changing their weights to zero)
  *
- * @dev The factory requires ROLE_TOKEN_CREATOR permission on the SYN token to mint yield
+ * @dev The factory requires ROLE_TOKEN_CREATOR permission on the SYNR token to mint yield
  *      (see `mintYieldTo` function)
  *
  * @author Pedro Bergamini, reviewed by Basil Gori
@@ -37,21 +37,21 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
 
   /// @dev Auxiliary data structure used only in getPoolData() view function
   struct PoolData {
-    // @dev pool token address (like SYN)
+    // @dev pool token address (like SYNR)
     address poolToken;
     // @dev pool address (like deployed core pool instance)
     address poolAddress;
-    // @dev pool weight (200 for SYN pools, 800 for SYN/ETH pools - set during deployment)
+    // @dev pool weight (200 for SYNR pools, 800 for SYNR/ETH pools - set during deployment)
     uint32 weight;
     // @dev flash pool flag
     bool isFlashPool;
   }
 
   /**
-   * @dev SYN/block determines yield farming reward base
+   * @dev SYNR/block determines yield farming reward base
    *      used by the yield pools controlled by the factory
    */
-  uint192 public synPerBlock;
+  uint192 public synrPerBlock;
 
   /**
    * @dev The yield is distributed proportionally to pool weights;
@@ -60,29 +60,29 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
   uint32 public totalWeight;
 
   /**
-   * @dev SYN/block decreases by 3% every blocks/update (set to 91252 blocks during deployment);
+   * @dev SYNR/block decreases by 3% every blocks/update (set to 91252 blocks during deployment);
    *      an update is triggered by executing `updateSYNPerBlock` public function
    */
   uint32 public immutable blocksPerUpdate;
 
   /**
-   * @dev End block is the last block when SYN/block can be decreased;
+   * @dev End block is the last block when SYNR/block can be decreased;
    *      it is implied that yield farming stops after that block
    */
   uint32 public endBlock;
 
   /**
-   * @dev Each time the SYN/block ratio gets updated, the block number
+   * @dev Each time the SYNR/block ratio gets updated, the block number
    *      when the operation has occurred gets recorded into `lastRatioUpdate`
    * @dev This block number is then used to check if blocks/update `blocksPerUpdate`
    *      has passed when decreasing yield reward by 3%
    */
   uint32 public lastRatioUpdate;
 
-  /// @dev sSYN token address is used to create SYN core pool(s)
-  address public immutable ssyn;
+  /// @dev sSYNR token address is used to create SYNR core pool(s)
+  address public immutable ssynr;
 
-  /// @dev Maps pool token address (like SYN) -> pool address (like core pool instance)
+  /// @dev Maps pool token address (like SYNR) -> pool address (like core pool instance)
   mapping(address => address) public pools;
 
   /// @dev Keeps track of registered pool addresses, maps pool address -> exists flag
@@ -92,7 +92,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    * @dev Fired in createPool() and registerPool()
    *
    * @param _by an address which executed an action
-   * @param poolToken pool token address (like SYN)
+   * @param poolToken pool token address (like SYNR)
    * @param poolAddress deployed pool instance address
    * @param weight pool weight
    * @param isFlashPool flag indicating if pool is a flash pool
@@ -118,44 +118,44 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    * @dev Fired in updateSYNPerBlock()
    *
    * @param _by an address which executed an action
-   * @param newSynPerBlock new SYN/block value
+   * @param newSynPerBlock new SYNR/block value
    */
   event SynRatioUpdated(address indexed _by, uint256 newSynPerBlock);
 
   /**
    * @dev Creates/deploys a factory instance
    *
-   * @param _syn SYN ERC20 token address
-   * @param _ssyn sSYN ERC20 token address
-   * @param _synPerBlock initial SYN/block value for rewards
+   * @param _synr SYNR ERC20 token address
+   * @param _ssynr sSYNR ERC20 token address
+   * @param _synrPerBlock initial SYNR/block value for rewards
    * @param _blocksPerUpdate how frequently the rewards gets updated (decreased by 3%), blocks
    * @param _initBlock block number to measure _blocksPerUpdate from
    * @param _endBlock block number when farming stops and rewards cannot be updated anymore
    */
   constructor(
-    address _syn,
-    address _ssyn,
-    uint192 _synPerBlock,
+    address _synr,
+    address _ssynr,
+    uint192 _synrPerBlock,
     uint32 _blocksPerUpdate,
     uint32 _initBlock,
     uint32 _endBlock
-  ) SyndicateAware(_syn) {
+  ) SyndicateAware(_synr) {
     // verify the inputs are set
-    require(_ssyn != address(0), "sSYN address not set");
-    require(_synPerBlock > 0, "SYN/block not set");
+    require(_ssynr != address(0), "sSYNR address not set");
+    require(_synrPerBlock > 0, "SYNR/block not set");
     require(_blocksPerUpdate > 0, "blocks/update not set");
     require(_initBlock > 0, "init block not set");
     require(_endBlock > _initBlock, "invalid end block: must be greater than init block");
 
-    // verify sSYN instance supplied
+    // verify sSYNR instance supplied
     require(
-      SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
-      "unexpected sSYN TOKEN_UID"
+      SyntheticSyndicateERC20(_ssynr).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
+      "unexpected sSYNR TOKEN_UID"
     );
 
     // save the inputs into internal state variables
-    ssyn = _ssyn;
-    synPerBlock = _synPerBlock;
+    ssynr = _ssynr;
+    synrPerBlock = _synrPerBlock;
     blocksPerUpdate = _blocksPerUpdate;
     lastRatioUpdate = _initBlock;
     endBlock = _endBlock;
@@ -166,7 +166,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    *
    * @dev A shortcut for `pools` mapping
    *
-   * @param poolToken pool token address (like SYN) to query pool address for
+   * @param poolToken pool token address (like SYNR) to query pool address for
    * @return pool address for the token specified
    */
   function getPoolAddress(address poolToken) external view returns (address) {
@@ -199,15 +199,15 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
   }
 
   /**
-   * @dev Verifies if `blocksPerUpdate` has passed since last SYN/block
-   *      ratio update and if SYN/block reward can be decreased by 3%
+   * @dev Verifies if `blocksPerUpdate` has passed since last SYNR/block
+   *      ratio update and if SYNR/block reward can be decreased by 3%
    *
    * @return true if enough time has passed and `updateSYNPerBlock` can be executed
    */
   function shouldUpdateRatio() public view returns (bool) {
     // if yield farming period has ended
     if (blockNumber() > endBlock) {
-      // SYN/block reward cannot be updated anymore
+      // SYNR/block reward cannot be updated anymore
       return false;
     }
 
@@ -220,7 +220,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    *
    * @dev Can be executed by the pool factory owner only
    *
-   * @param poolToken pool token address (like SYN, or SYN/ETH pair)
+   * @param poolToken pool token address (like SYNR, or SYNR/ETH pair)
    * @param initBlock init block to be used for the pool created
    * @param weight weight of the pool to be created
    */
@@ -230,7 +230,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     uint32 weight
   ) external virtual onlyOwner {
     // create/deploy new core pool instance
-    IPool pool = new SyndicateCorePool(syn, ssyn, this, poolToken, initBlock, weight);
+    IPool pool = new SyndicateCorePool(synr, ssynr, this, poolToken, initBlock, weight);
 
     // register it within a factory
     registerPool(address(pool));
@@ -264,43 +264,43 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
   }
 
   /**
-   * @notice Decreases SYN/block reward by 3%, can be executed
+   * @notice Decreases SYNR/block reward by 3%, can be executed
    *      no more than once per `blocksPerUpdate` blocks
    */
   function updateSYNPerBlock() external {
     // checks if ratio can be updated i.e. if blocks/update (91252 blocks) have passed
     require(shouldUpdateRatio(), "too frequent");
 
-    // decreases SYN/block reward by 3%
-    synPerBlock = (synPerBlock * 97) / 100;
+    // decreases SYNR/block reward by 3%
+    synrPerBlock = (synrPerBlock * 97) / 100;
 
     // set current block as the last ratio update block
     lastRatioUpdate = uint32(blockNumber());
 
     // emit an event
-    emit SynRatioUpdated(msg.sender, synPerBlock);
+    emit SynRatioUpdated(msg.sender, synrPerBlock);
   }
 
-  function overrideSYNPerBlock(uint192 _synPerBlock) external onlyOwner{
-    synPerBlock = _synPerBlock;
+  function overrideSYNPerBlock(uint192 _synrPerBlock) external onlyOwner {
+    synrPerBlock = _synrPerBlock;
     // emit an event
-    emit SynRatioUpdated(msg.sender, synPerBlock);
+    emit SynRatioUpdated(msg.sender, synrPerBlock);
   }
 
   /**
-   * @dev Mints SYN tokens; executed by SYN Pool only
+   * @dev Mints SYNR tokens; executed by SYNR Pool only
    *
    * @dev Requires factory to have ROLE_TOKEN_CREATOR permission
-   *      on the SYN ERC20 token instance
+   *      on the SYNR ERC20 token instance
    *
    * @param _to an address to mint tokens to
-   * @param _amount amount of SYN tokens to mint
+   * @param _amount amount of SYNR tokens to mint
    */
   function mintYieldTo(address _to, uint256 _amount) external {
     // verify that sender is a pool registered withing the factory
     require(poolExists[msg.sender], "access denied");
 
-    // mint SYN tokens as required
+    // mint SYNR tokens as required
     _mintSyn(_to, _amount);
   }
 

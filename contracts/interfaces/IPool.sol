@@ -46,7 +46,7 @@ interface IPool is ILinkedToSYN {
 
   // for the rest of the functions see Soldoc in SyndicatePoolBase
 
-  function ssyn() external view returns (address);
+  function ssynr() external view returns (address);
 
   function poolToken() external view returns (address);
 

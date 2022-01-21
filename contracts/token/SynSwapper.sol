@@ -10,9 +10,9 @@ import "../utils/AccessControl.sol";
 /**
  * @title Syn Swapper
  *
- * @notice A contract to swap sSYN for an indentical amount of SYN
- *         The contract must have ssyn.ROLE_TOKEN_DESTROYER and
- *         syn.ROLE_TOKEN_CREATOR roles
+ * @notice A contract to swap sSYNR for an indentical amount of SYNR
+ *         The contract must have ssynr.ROLE_TOKEN_DESTROYER and
+ *         synr.ROLE_TOKEN_CREATOR roles
  *
  * @author Francesco Sullo
  */
@@ -20,27 +20,27 @@ contract SynSwapper is AccessControl {
   event SynSwapped(address swapper, uint256 amount);
 
   address public owner;
-  SyndicateERC20 public syn;
-  SyntheticSyndicateERC20 public ssyn;
+  SyndicateERC20 public synr;
+  SyntheticSyndicateERC20 public ssynr;
 
   constructor(
     address _superAdmin,
-    address _syn,
-    address _ssyn
+    address _synr,
+    address _ssynr
   ) AccessControl(_superAdmin) {
-    syn = SyndicateERC20(_syn);
-    ssyn = SyntheticSyndicateERC20(_ssyn);
+    synr = SyndicateERC20(_synr);
+    ssynr = SyntheticSyndicateERC20(_ssynr);
   }
 
   /**
-   * @notice Swaps an amount of sSYN for an identical amount of SYN
+   * @notice Swaps an amount of sSYNR for an identical amount of SYNR
    *         Everyone can execute it, but it will have effect only if the recipient
    *         has the required roles.
    * @param amount     The amount of token to be swapped
    */
   function swap(uint256 amount) external {
-    require(syn.isOperatorInRole(msg.sender, syn.ROLE_TREASURY()), "SYNR: not a treasury");
-    ssyn.burn(msg.sender, amount);
-    syn.mint(msg.sender, amount);
+    require(synr.isOperatorInRole(msg.sender, synr.ROLE_TREASURY()), "SYNR: not a treasury");
+    ssynr.burn(msg.sender, amount);
+    synr.mint(msg.sender, amount);
   }
 }

@@ -7,13 +7,13 @@ import "../interfaces/IMigrator.sol";
 
 contract CorePoolV2Mock is SyndicateCorePool, IMigrator {
   constructor(
-    address _syn,
-    address _ssyn,
+    address _synr,
+    address _ssynr,
     SyndicatePoolFactory _factory,
     address _poolToken,
     uint64 _initBlock,
     uint32 _weight
-  ) SyndicateCorePool(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight) {}
+  ) SyndicateCorePool(_synr, _ssynr, _factory, _poolToken, _initBlock, _weight) {}
 
   function receiveDeposits(address _staker, IPool.User memory _user) external override {
     // In this example we do not consider the case where
