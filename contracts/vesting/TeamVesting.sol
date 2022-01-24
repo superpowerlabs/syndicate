@@ -9,7 +9,7 @@ import "../utils/Ownable.sol";
 contract TeamVesting is Ownable {
   uint256 public startTime;
   uint256 public cliff;
-  address public syn;
+  address public synr;
 
   struct Grant {
     uint120 amount;
@@ -24,8 +24,8 @@ contract TeamVesting is Ownable {
     _;
   }
 
-  constructor(address _syn, uint256 _cliff) {
-    syn = _syn;
+  constructor(address _synr, uint256 _cliff) {
+    synr = _synr;
     require(_cliff <= 365 + 31, "TeamVesting: cliff too long");
     cliff = _cliff;
   }
@@ -39,7 +39,7 @@ contract TeamVesting is Ownable {
       grantees.push(_grantees[i]);
       totalGrants += _amounts[i];
     }
-    require(SyndicateERC20(syn).balanceOf(address(this)) >= totalGrants, "TeamVesting: fund missing");
+    require(SyndicateERC20(synr).balanceOf(address(this)) >= totalGrants, "TeamVesting: fund missing");
     startTime = block.timestamp;
   }
 
@@ -56,7 +56,7 @@ contract TeamVesting is Ownable {
     );
     require(uint256(vestedAmount(msg.sender) - grants[msg.sender].claimed) >= _amount, "TeamVesting: not enough vested tokens");
     grants[msg.sender].claimed += uint120(_amount);
-    SyndicateERC20(syn).transfer(recipient, _amount);
+    SyndicateERC20(synr).transfer(recipient, _amount);
   }
 
   function vestedAmount(address grantee) public view isGrantee(grantee) returns (uint120) {
@@ -80,6 +80,6 @@ contract TeamVesting is Ownable {
       amount += uint256(grants[msg.sender].amount - grants[msg.sender].claimed);
       grants[msg.sender].claimed = grants[msg.sender].amount;
     }
-    SyndicateERC20(syn).transfer(owner(), amount);
+    SyndicateERC20(synr).transfer(owner(), amount);
   }
 }

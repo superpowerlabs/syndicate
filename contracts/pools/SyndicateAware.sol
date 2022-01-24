@@ -15,24 +15,24 @@ import "../interfaces/ILinkedToSYN.sol";
  * Adapted for Syn City by Superpower Labs
  */
 abstract contract SyndicateAware is ILinkedToSYN {
-  /// @dev Link to SYN ERC20 Token SyndicateERC20 instance
-  address public immutable override syn;
+  /// @dev Link to SYNR ERC20 Token SyndicateERC20 instance
+  address public immutable override synr;
 
   /**
    * @dev Creates SyndicateAware instance, requiring to supply deployed SyndicateERC20 instance address
    *
-   * @param _syn deployed SyndicateERC20 instance address
+   * @param _synr deployed SyndicateERC20 instance address
    */
-  constructor(address _syn) {
-    // verify SYN address is set and is correct
-    require(_syn != address(0), "SYN address not set");
+  constructor(address _synr) {
+    // verify SYNR address is set and is correct
+    require(_synr != address(0), "SYNR address not set");
     require(
-      SyndicateERC20(_syn).TOKEN_UID() == 0x83ecb176af7c4f35a45ff0018282e3a05a1018065da866182df12285866f5a2c,
+      SyndicateERC20(_synr).TOKEN_UID() == 0x83ecb176af7c4f35a45ff0018282e3a05a1018065da866182df12285866f5a2c,
       "unexpected TOKEN_UID"
     );
 
-    // write SYN address
-    syn = _syn;
+    // write SYNR address
+    synr = _synr;
   }
 
   /**
@@ -58,7 +58,7 @@ abstract contract SyndicateAware is ILinkedToSYN {
     uint256 _value
   ) internal {
     // just delegate call to the target
-    SyndicateERC20(syn).transferFrom(_from, _to, _value);
+    SyndicateERC20(synr).transferFrom(_from, _to, _value);
   }
 
   /**
@@ -69,6 +69,6 @@ abstract contract SyndicateAware is ILinkedToSYN {
    */
   function _mintSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
-    SyndicateERC20(syn).mint(_to, _value);
+    SyndicateERC20(synr).mint(_to, _value);
   }
 }

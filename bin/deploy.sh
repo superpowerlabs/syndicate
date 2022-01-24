@@ -6,7 +6,7 @@ rm -rf cache
 npx hardhat compile
 
 if [[ "$1" == "pool" ]]; then
-# bin/deploy.sh pool localhost 996723695916666666666 91252 7120725 200
+# bin/deploy.sh pool localhost 360000000000000000000 91252 7120725 200
 # 1080 is 30%, 990 is 27.5%
   SYN_PER_BLOCK=$3 BLOCK_PER_UPDATE=$4 BLOCK_MULTIPLIER=$5 WEIGHT=$6 \
     npx hardhat run scripts/deploy-$1.js --network $2

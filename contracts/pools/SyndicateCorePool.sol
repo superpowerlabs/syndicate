@@ -8,7 +8,7 @@ import "./SyndicatePoolBase.sol";
  * @title Syndicate Core Pool
  *        Original title: Illuvium Core Pool
  *
- * @notice Core pools represent permanent pools like SYN or SYN/ETH Pair pool,
+ * @notice Core pools represent permanent pools like SYNR or SYNR/ETH Pair pool,
  *      core pools allow staking for arbitrary periods of time up to 1 year
  *
  * @dev See SyndicatePoolBase for more details
@@ -21,7 +21,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
   // solhint-disable-next-line
   bool public constant override isFlashPool = false;
 
-  /// @dev Control parameter of how much reward in sSYN user will get immediately upon staking.
+  /// @dev Control parameter of how much reward in sSYNR user will get immediately upon staking.
   /// 0 when feature is disabled.  In base points.
   uint256 public quickRewardRate;
 
@@ -38,9 +38,9 @@ contract SyndicateCorePool is SyndicatePoolBase {
   uint256 public vaultRewardsPerWeight;
 
   /// @dev Pool tokens value available in the pool;
-  ///      pool token examples are SYN (SYN core pool) or SYN/ETH pair (LP core pool)
-  /// @dev For LP core pool this value doesnt' count for SYN tokens received as Vault rewards
-  ///      while for SYN core pool it does count for such tokens as well
+  ///      pool token examples are SYNR (SYNR core pool) or SYNR/ETH pair (LP core pool)
+  /// @dev For LP core pool this value doesnt' count for SYNR tokens received as Vault rewards
+  ///      while for SYNR core pool it does count for such tokens as well
   uint256 public poolTokenReserve;
 
   /**
@@ -70,22 +70,22 @@ contract SyndicateCorePool is SyndicatePoolBase {
   /**
    * @dev Creates/deploys an instance of the core pool
    *
-   * @param _syn SYN ERC20 Token SyndicateERC20 address
-   * @param _ssyn sSYN ERC20 Token  SyntheticSyndicateERC20 address
+   * @param _synr SYNR ERC20 Token SyndicateERC20 address
+   * @param _ssynr sSYNR ERC20 Token  SyntheticSyndicateERC20 address
    * @param _factory Pool factory SyndicatePoolFactory instance/address
-   * @param _poolToken token the pool operates on, for example SYN or SYN/ETH pair
+   * @param _poolToken token the pool operates on, for example SYNR or SYNR/ETH pair
    * @param _initBlock initial block used to calculate the rewards
    * @param _weight number representing a weight of the pool, actual weight fraction
    *      is calculated as that number divided by the total pools weight and doesn't exceed one
    */
   constructor(
-    address _syn,
-    address _ssyn,
+    address _synr,
+    address _ssynr,
     SyndicatePoolFactory _factory,
     address _poolToken,
     uint64 _initBlock,
     uint32 _weight
-  ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight) {}
+  ) SyndicatePoolBase(_synr, _ssynr, _factory, _poolToken, _initBlock, _weight) {}
 
   /**
    * @notice Calculates current vault rewards value available for address specified
@@ -102,7 +102,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
     return weightToReward(user.totalWeight, vaultRewardsPerWeight) - user.subVaultRewards;
   }
 
-  /** @notice set the reward weight for sSYN distributed upon staking
+  /** @notice set the reward weight for sSYNR distributed upon staking
    *
    *  @dev  divide quick reward by 10000 to get the actual value and 100000 (10x) is used as a general limit
    *
@@ -138,12 +138,12 @@ contract SyndicateCorePool is SyndicatePoolBase {
   }
 
   /**
-   * @dev Executed by the vault to transfer vault rewards SYN from the vault
+   * @dev Executed by the vault to transfer vault rewards SYNR from the vault
    *      into the pool
    *
-   * @dev This function is executed only for SYN core pools
+   * @dev This function is executed only for SYNR core pools
    *
-   * @param _rewardsAmount amount of SYN rewards to transfer into the pool
+   * @param _rewardsAmount amount of SYNR rewards to transfer into the pool
    */
   function receiveVaultRewards(uint256 _rewardsAmount) external {
     require(msg.sender == vault, "access denied");
@@ -157,8 +157,8 @@ contract SyndicateCorePool is SyndicatePoolBase {
 
     vaultRewardsPerWeight += rewardToWeight(_rewardsAmount, usersLockingWeight);
 
-    // update `poolTokenReserve` only if this is a SYN Core Pool
-    if (poolToken == syn) {
+    // update `poolTokenReserve` only if this is a SYNR Core Pool
+    if (poolToken == synr) {
       poolTokenReserve += _rewardsAmount;
     }
 
@@ -180,11 +180,11 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    * @dev _useSSYN flag has a context of yield rewards only
    *
-   * @param _useSSYN flag indicating whether to mint sSYN token as a reward or not;
-   *      when set to true - sSYN reward is minted immediately and sent to sender,
-   *      when set to false - new SYN reward deposit gets created if pool is an SYN pool
-   *      (poolToken is SYN token), or new pool deposit gets created together with sSYN minted
-   *      when pool is not an SYN pool (poolToken is not an SYN token)
+   * @param _useSSYN flag indicating whether to mint sSYNR token as a reward or not;
+   *      when set to true - sSYNR reward is minted immediately and sent to sender,
+   *      when set to false - new SYNR reward deposit gets created if pool is an SYNR pool
+   *      (poolToken is SYNR token), or new pool deposit gets created together with sSYNR minted
+   *      when pool is not an SYNR pool (poolToken is not an SYNR token)
    */
   function processRewards(bool _useSSYN) external override {
     _processRewards(msg.sender, _useSSYN, true);
@@ -193,7 +193,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
   /**
    * @dev Executed internally by the pool itself (from the parent `SyndicatePoolBase` smart contract)
    *      as part of yield rewards processing logic (`SyndicatePoolBase._processRewards` function)
-   * @dev Executed when _useSSYN is false and pool is not an SYN pool - see `SyndicatePoolBase._processRewards`
+   * @dev Executed when _useSSYN is false and pool is not an SYNR pool - see `SyndicatePoolBase._processRewards`
    *
    * @param _staker an address which stakes (the yield reward)
    * @param _amount amount to be staked (yield reward amount)
@@ -282,7 +282,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    * @inheritdoc SyndicatePoolBase
    *
    * @dev Additionally to the parent smart contract, processes vault rewards of the holder,
-   *      and for SYN pool updates (increases) pool token reserve (pool tokens value available in the pool)
+   *      and for SYNR pool updates (increases) pool token reserve (pool tokens value available in the pool)
    */
   function _processRewards(
     address _staker,
@@ -292,8 +292,8 @@ contract SyndicateCorePool is SyndicatePoolBase {
     _processVaultRewards(_staker);
     pendingYield = super._processRewards(_staker, _useSSYN, _withUpdate);
 
-    // update `poolTokenReserve` only if this is a SYN Core Pool
-    if (poolToken == syn && !_useSSYN) {
+    // update `poolTokenReserve` only if this is a SYNR Core Pool
+    if (poolToken == synr && !_useSSYN) {
       poolTokenReserve += pendingYield;
     }
   }
@@ -307,26 +307,26 @@ contract SyndicateCorePool is SyndicatePoolBase {
     User storage user = users[_staker];
     uint256 pendingVaultClaim = pendingVaultRewards(_staker);
     if (pendingVaultClaim == 0) return;
-    // read SYN token balance of the pool via standard ERC20 interface
-    uint256 synBalance = IERC20(syn).balanceOf(address(this));
-    require(synBalance >= pendingVaultClaim, "contract SYN balance too low");
+    // read SYNR token balance of the pool via standard ERC20 interface
+    uint256 synBalance = IERC20(synr).balanceOf(address(this));
+    require(synBalance >= pendingVaultClaim, "contract SYNR balance too low");
 
-    // update `poolTokenReserve` only if this is a SYN Core Pool
-    if (poolToken == syn) {
+    // update `poolTokenReserve` only if this is a SYNR Core Pool
+    if (poolToken == synr) {
       // protects against rounding errors
       poolTokenReserve -= pendingVaultClaim > poolTokenReserve ? poolTokenReserve : pendingVaultClaim;
     }
 
     user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
 
-    // transfer fails if pool SYN balance is not enough - which is a desired behavior
+    // transfer fails if pool SYNR balance is not enough - which is a desired behavior
     _transferSyn(_staker, pendingVaultClaim);
 
     emit VaultRewardsClaimed(msg.sender, _staker, pendingVaultClaim);
   }
 
   function delegate(address receiver) external onlyFactoryOwner {
-    require(poolToken == syn, "CorePool: only syn pool can delegate");
-    SyndicateERC20(syn).delegate(receiver);
+    require(poolToken == synr, "CorePool: only synr pool can delegate");
+    SyndicateERC20(synr).delegate(receiver);
   }
 }

@@ -300,8 +300,8 @@ contract SyndicateERC20 is AccessControl {
   uint32 public constant ROLE_WHITE_LISTED_SPENDER = 0x0010_0000;
 
   /**
-   * @notice White listed treasury can swap sSYN to receive SYNR
-   * @dev Role ROLE_TREASURY can get SYNR in exchange for sSYN
+   * @notice White listed treasury can swap sSYNR to receive SYNR
+   * @dev Role ROLE_TREASURY can get SYNR in exchange for sSYNR
    */
   uint32 public constant ROLE_TREASURY = 0x0020_0000;
 
@@ -486,7 +486,6 @@ contract SyndicateERC20 is AccessControl {
     // fire an event
     emit SymbolUpdated(_symbol);
   }
-
 
   /**
    * @notice Transfers some tokens on behalf of address `_from' (token owner)

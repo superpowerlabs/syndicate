@@ -8,7 +8,7 @@ import "./SyndicatePoolBase.sol";
  * @title Syndicate Flash Pool
  *        Original title: Illuvium Flash Pool
  *
- * @notice Flash pools represent temporary pools like SYN/SNX pool,
+ * @notice Flash pools represent temporary pools like SYNR/SNX pool,
  *      flash pools allow staking for exactly 1 year period
  *
  * @notice Flash pools doesn't lock tokens, staked tokens can be unstaked  at any time
@@ -29,24 +29,24 @@ contract SyndicateFlashPool is SyndicatePoolBase {
   /**
    * @dev Creates/deploys an instance of the flash pool
    *
-   * @param _syn SYN ERC20 Token SyndicateERC20 address
-   * @param _ssyn sSYN ERC20 Token  SyntheticSyndicateERC20 address
+   * @param _synr SYNR ERC20 Token SyndicateERC20 address
+   * @param _ssynr sSYNR ERC20 Token  SyntheticSyndicateERC20 address
    * @param _factory Pool factory SyndicatePoolFactory instance/address
-   * @param _poolToken token the pool operates on, for example SYN or SYN/ETH pair
+   * @param _poolToken token the pool operates on, for example SYNR or SYNR/ETH pair
    * @param _initBlock initial block used to calculate the rewards
    * @param _weight number representing a weight of the pool, actual weight fraction
    *      is calculated as that number divided by the total pools weight and doesn't exceed one
    * @param _endBlock pool expiration time (as block number)
    */
   constructor(
-    address _syn,
-    address _ssyn,
+    address _synr,
+    address _ssynr,
     SyndicatePoolFactory _factory,
     address _poolToken,
     uint64 _initBlock,
     uint32 _weight,
     uint64 _endBlock
-  ) SyndicatePoolBase(_syn, _ssyn, _factory, _poolToken, _initBlock, _weight) {
+  ) SyndicatePoolBase(_synr, _ssynr, _factory, _poolToken, _initBlock, _weight) {
     // check the inputs which are not checked by the pool base
     require(_endBlock > _initBlock, "end block must be higher than init block");
 

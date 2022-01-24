@@ -14,18 +14,18 @@ import "../interfaces/IMigrator.sol";
  *        Original title: Illuvium Pool Base
  *
  * @notice An abstract contract containing common logic for any pool,
- *      be it a flash pool (temporary pool like SNX) or a core pool (permanent pool like SYN/ETH or SYN pool)
+ *      be it a flash pool (temporary pool like SNX) or a core pool (permanent pool like SYNR/ETH or SYNR pool)
  *
  * @dev Deployment and initialization.
  *      Any pool deployed must be bound to the deployed pool factory (SyndicatePoolFactory)
  *      Additionally, 3 token instance addresses must be defined on deployment:
- *          - SYN token address
- *          - sSYN token address, used to mint sSYN rewards
- *          - pool token address, it can be SYN token address, SYN/ETH pair address, and others
+ *          - SYNR token address
+ *          - sSYNR token address, used to mint sSYNR rewards
+ *          - pool token address, it can be SYNR token address, SYNR/ETH pair address, and others
  *
  * @dev Pool weight defines the fraction of the yield current pool receives among the other pools,
  *      pool factory is responsible for the weight synchronization between the pools.
- * @dev The weight is logically 10% for SYN pool and 90% for SYN/ETH pool.
+ * @dev The weight is logically 10% for SYNR pool and 90% for SYNR/ETH pool.
  *      Since Solidity doesn't support fractions the weight is defined by the division of
  *      pool weight by total pools weight (sum of all registered pools within the factory)
  *
@@ -40,16 +40,16 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Token holder storage, maps token holder address to their data record
   mapping(address => User) public users;
 
-  /// @dev Link to sSYN ERC20 Token  SyntheticSyndicateERC20 instance
-  address public immutable override ssyn;
+  /// @dev Link to sSYNR ERC20 Token  SyntheticSyndicateERC20 instance
+  address public immutable override ssynr;
 
   /// @dev Link to the pool factory SyndicatePoolFactory instance
   SyndicatePoolFactory public immutable factory;
 
-  /// @dev Link to the pool token instance, for example SYN or SYN/ETH pair
+  /// @dev Link to the pool token instance, for example SYNR or SYNR/ETH pair
   address public immutable override poolToken;
 
-  /// @dev Pool weight, 100 for SYN pool or 900 for SYN/ETH
+  /// @dev Pool weight, 100 for SYNR pool or 900 for SYNR/ETH
   uint32 public override weight;
 
   /// @dev Block number of the last yield distribution event
@@ -132,7 +132,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @param _by an address which performed an operation
    * @param _to an address which claimed the yield reward
-   * @param sSyn flag indicating if reward was paid (minted) in sSYN
+   * @param sSyn flag indicating if reward was paid (minted) in sSYNR
    * @param amount amount of yield paid
    */
   event YieldClaimed(address indexed _by, address indexed _to, bool sSyn, uint256 amount);
@@ -160,34 +160,34 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /**
    * @dev Overridden in sub-contracts to construct the pool
    *
-   * @param _syn SYN ERC20 Token SyndicateERC20 address
-   * @param _ssyn sSYN ERC20 Token  SyntheticSyndicateERC20 address
+   * @param _synr SYNR ERC20 Token SyndicateERC20 address
+   * @param _ssynr sSYNR ERC20 Token  SyntheticSyndicateERC20 address
    * @param _factory Pool factory SyndicatePoolFactory instance/address
-   * @param _poolToken token the pool operates on, for example SYN or SYN/ETH pair
+   * @param _poolToken token the pool operates on, for example SYNR or SYNR/ETH pair
    * @param _initBlock initial block used to calculate the rewards
    *      note: _initBlock can be set to the future effectively meaning _sync() calls will do nothing
    * @param _weight number representing a weight of the pool, actual weight fraction
    *      is calculated as that number divided by the total pools weight and doesn't exceed one
    */
   constructor(
-    address _syn,
-    address _ssyn,
+    address _synr,
+    address _ssynr,
     SyndicatePoolFactory _factory,
     address _poolToken,
     uint64 _initBlock,
     uint32 _weight
-  ) SyndicateAware(_syn) {
+  ) SyndicateAware(_synr) {
     // verify the inputs are set
-    require(_ssyn != address(0), "sSYN address not set");
-    require(address(_factory) != address(0), "SYN Pool fct address not set");
+    require(_ssynr != address(0), "sSYNR address not set");
+    require(address(_factory) != address(0), "SYNR Pool fct address not set");
     require(_poolToken != address(0), "pool token address not set");
     require(_initBlock > 0, "init block not set");
     require(_weight > 0, "pool weight not set");
 
-    // verify sSYN instance supplied
+    // verify sSYNR instance supplied
     require(
-      SyntheticSyndicateERC20(_ssyn).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
-      "unexpected sSYN TOKEN_UID"
+      SyntheticSyndicateERC20(_ssynr).TOKEN_UID() == 0xac3051b8d4f50966afb632468a4f61483ae6a953b74e387a01ef94316d6b7d62,
+      "unexpected sSYNR TOKEN_UID"
     );
     // verify SyndicatePoolFactory instance supplied
     require(
@@ -196,7 +196,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     );
 
     // save the inputs into internal state variables
-    ssyn = _ssyn;
+    ssynr = _ssynr;
     factory = _factory;
     poolToken = _poolToken;
     weight = _weight;
@@ -223,7 +223,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
       }
       user.deposits.pop();
     }
-    SyndicateERC20(syn).transfer(address(migrator), tokenToMigrate);
+    SyndicateERC20(synr).transfer(address(migrator), tokenToMigrate);
     delete users[msg.sender];
   }
 
@@ -242,7 +242,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     if (blockNumber() > lastYieldDistribution && usersLockingWeight != 0) {
       uint256 endBlock = factory.endBlock();
       uint256 multiplier = blockNumber() > endBlock ? endBlock - lastYieldDistribution : blockNumber() - lastYieldDistribution;
-      uint256 synRewards = (multiplier * weight * factory.synPerBlock()) / factory.totalWeight();
+      uint256 synRewards = (multiplier * weight * factory.synrPerBlock()) / factory.totalWeight();
 
       // recalculated value for `yieldRewardsPerWeight`
       newYieldRewardsPerWeight = rewardToWeight(synRewards, usersLockingWeight) + yieldRewardsPerWeight;
@@ -303,7 +303,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @param _amount amount of tokens to stake
    * @param _lockUntil stake period as unix timestamp; zero means no locking
-   * @param _useSSYN a flag indicating if previous reward to be paid as sSYN
+   * @param _useSSYN a flag indicating if previous reward to be paid as sSYNR
    */
   function stake(
     uint256 _amount,
@@ -321,7 +321,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @param _depositId deposit ID to unstake from, zero-indexed
    * @param _amount amount of tokens to unstake
-   * @param _useSSYN a flag indicating if reward to be paid as sSYN
+   * @param _useSSYN a flag indicating if reward to be paid as sSYNR
    */
   function unstake(
     uint256 _depositId,
@@ -342,7 +342,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *
    * @param depositId updated deposit ID
    * @param lockedUntil updated deposit locked until value
-   * @param useSSYN used for _processRewards check if it should use SYN or sSYN
+   * @param useSSYN used for _processRewards check if it should use SYNR or sSYNR
    */
   function updateStakeLock(
     uint256 depositId,
@@ -381,11 +381,11 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev When timing conditions are not met (executed too frequently, or after factory
    *      end block), function doesn't throw and exits silently
    *
-   * @param _useSSYN flag indicating whether to mint sSYN token as a reward or not;
-   *      when set to true - sSYN reward is minted immediately and sent to sender,
-   *      when set to false - new SYN reward deposit gets created if pool is an SYN pool
-   *      (poolToken is SYN token), or new pool deposit gets created together with sSYN minted
-   *      when pool is not an SYN pool (poolToken is not an SYN token)
+   * @param _useSSYN flag indicating whether to mint sSYNR token as a reward or not;
+   *      when set to true - sSYNR reward is minted immediately and sent to sender,
+   *      when set to false - new SYNR reward deposit gets created if pool is an SYNR pool
+   *      (poolToken is SYNR token), or new pool deposit gets created together with sSYNR minted
+   *      when pool is not an SYNR pool (poolToken is not an SYNR token)
    */
   function processRewards(bool _useSSYN) external virtual override {
     // delegate call to an internal function
@@ -409,7 +409,6 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // set the new weight value
     weight = _weight;
-    console.log("weight in factory %s", weight);
   }
 
   /**
@@ -439,7 +438,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _staker an address which stakes tokens and which will receive them back
    * @param _amount amount of tokens to stake
    * @param _lockUntil stake period as unix timestamp; zero means no locking
-   * @param _useSSYN a flag indicating if previous reward to be paid as sSYN
+   * @param _useSSYN a flag indicating if previous reward to be paid as sSYNR
    * @param _isYield a flag indicating if that stake is created to store yield reward
    *      from the previously unstaked stake
    */
@@ -519,7 +518,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _staker an address which unstakes tokens (which previously staked them)
    * @param _depositId deposit ID to unstake from, zero-indexed
    * @param _amount amount of tokens to unstake
-   * @param _useSSYN a flag indicating if reward to be paid as sSYN
+   * @param _useSSYN a flag indicating if reward to be paid as sSYNR
    */
   function _unstake(
     address _staker,
@@ -588,7 +587,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *      updates factory state via `updateSYNPerBlock`
    */
   function _sync() internal virtual poolAlive {
-    // update SYN per block value in factory if required
+    // update SYNR per block value in factory if required
     if (factory.shouldUpdateRatio()) {
       factory.updateSYNPerBlock();
     }
@@ -609,10 +608,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // to calculate the reward we need to know how many blocks passed, and reward per block
     uint256 currentBlock = blockNumber() > endBlock ? endBlock : blockNumber();
     uint256 blocksPassed = currentBlock - lastYieldDistribution;
-    uint256 synPerBlock = factory.synPerBlock();
+    uint256 synrPerBlock = factory.synrPerBlock();
 
     // calculate the reward
-    uint256 synReward = (blocksPassed * synPerBlock * weight) / factory.totalWeight();
+    uint256 synReward = (blocksPassed * synrPerBlock * weight) / factory.totalWeight();
 
     totalYieldReward += synReward;
 
@@ -628,7 +627,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Used internally, mostly by children implementations, see processRewards()
    *
    * @param _staker an address which receives the reward (which has staked some tokens earlier)
-   * @param _useSSYN flag indicating whether to mint sSYN token as a reward or not, see processRewards()
+   * @param _useSSYN flag indicating whether to mint sSYNR token as a reward or not, see processRewards()
    * @param _withUpdate flag allowing to disable synchronization (see sync()) if set to false
    * @return pendingYield the rewards calculated and optionally re-staked
    */
@@ -651,16 +650,16 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // get link to a user data structure, we will write into it later
     User storage user = users[_staker];
 
-    // if sSYN is requested
+    // if sSYNR is requested
     if (_useSSYN) {
-      // - mint sSYN
+      // - mint sSYNR
       mintSSyn(_staker, pendingYield);
-    } else if (poolToken == syn) {
+    } else if (poolToken == synr) {
       // calculate pending yield weight,
       // 2e6 is the bonus weight when staking for 1 year
       uint256 depositWeight = pendingYield * YEAR_STAKE_WEIGHT_MULTIPLIER;
 
-      // if the pool is SYN Pool - create new SYN deposit
+      // if the pool is SYNR Pool - create new SYNR deposit
       // and save it - push it into deposits array
       Deposit memory newDeposit = Deposit({
         tokenAmount: pendingYield,
@@ -679,7 +678,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
       usersLockingWeight += depositWeight;
     } else {
       // for other pools - stake as pool
-      address synPool = factory.getPoolAddress(syn);
+      address synPool = factory.getPoolAddress(synr);
       ICorePool(synPool).stakeAsPool(_staker, pendingYield);
     }
 
@@ -744,10 +743,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
   /**
    * @dev Converts stake weight (not to be mixed with the pool weight) to
-   *      SYN reward value, applying the 10^12 division on weight
+   *      SYNR reward value, applying the 10^12 division on weight
    *
    * @param _weight stake weight
-   * @param rewardPerWeight SYN reward per weight
+   * @param rewardPerWeight SYNR reward per weight
    * @return reward value normalized to 10^12
    */
   function weightToReward(uint256 _weight, uint256 rewardPerWeight) public pure returns (uint256) {
@@ -756,10 +755,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   }
 
   /**
-   * @dev Converts reward SYN value to stake weight (not to be mixed with the pool weight),
+   * @dev Converts reward SYNR value to stake weight (not to be mixed with the pool weight),
    *      applying the 10^12 multiplication on the reward
    *      - OR -
-   * @dev Converts reward SYN value to reward/weight if stake weight is supplied as second
+   * @dev Converts reward SYNR value to reward/weight if stake weight is supplied as second
    *      function parameter instead of reward/weight
    *
    * @param reward yield reward
@@ -802,7 +801,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   // solhint-disable-next-line
   function mintSSyn(address _to, uint256 _value) internal {
     // just delegate call to the target
-    SyntheticSyndicateERC20(ssyn).mint(_to, _value);
+    SyntheticSyndicateERC20(ssynr).mint(_to, _value);
   }
 
   /**

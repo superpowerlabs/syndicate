@@ -9,7 +9,7 @@ import "../utils/Ownable.sol";
 contract InvestorVesting is Ownable {
   event TGETriggered(uint256 nowTimestamp, uint256 timestampTGE);
 
-  address public syn;
+  address public synr;
   uint256 public timestampTGE;
   uint256 private _previouslyInvested;
 
@@ -31,8 +31,8 @@ contract InvestorVesting is Ownable {
 
   mapping(address => Investment) public investments;
 
-  constructor(address _syn) {
-    syn = _syn;
+  constructor(address _synr) {
+    synr = _synr;
     // seed
     vestingSchedules[1] = VestingSchedule({tge: 1, firstWeek: 2, secondWeek: 3, thirdWeek: 4, fourthWeek: 5});
     // strategic
@@ -71,7 +71,7 @@ contract InvestorVesting is Ownable {
       } // else we just skip it. It can be an error
     }
     _previouslyInvested += totalInvestments;
-    require(SyndicateERC20(syn).balanceOf(address(this)) >= _previouslyInvested, "TeamVesting: not enough tokens");
+    require(SyndicateERC20(synr).balanceOf(address(this)) >= _previouslyInvested, "TeamVesting: not enough tokens");
   }
 
   function claim(address recipient, uint256 _amount) external {
@@ -86,7 +86,7 @@ contract InvestorVesting is Ownable {
       "InvestorVesting: not enough vested tokens"
     );
     investments[msg.sender].claimed += uint120(_amount);
-    SyndicateERC20(syn).transfer(recipient, _amount);
+    SyndicateERC20(synr).transfer(recipient, _amount);
   }
 
   function vestedAmount(address investor) public view returns (uint120) {
