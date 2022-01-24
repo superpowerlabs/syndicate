@@ -29,7 +29,7 @@ To verify SyntheticSyndicateERC20 source code:
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
       ${ssyn.address}  \\
-      ${superAdmin.address}
+      ${superAdmin}
       
 `)
 
