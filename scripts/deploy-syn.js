@@ -19,13 +19,11 @@ async function main() {
       ? localSuperAdmin.address
       : process.env.SUPER_ADMIN
 
-  if (!process.env.MAX_TOTAL_SUPPLY) {
-    throw new Error('Missing parameters')
-  }
+  const maxTotalSupply = process.env.MAX_TOTAL_SUPPLY || 10000000000
 
   console.log('Deploying SyndicateERC20...')
   const SYN = await ethers.getContractFactory("SyndicateERC20")
-  const syn = await SYN.deploy(tokenOwner, process.env.MAX_TOTAL_SUPPLY, superAdmin)
+  const syn = await SYN.deploy(tokenOwner, maxTotalSupply, superAdmin)
   await syn.deployed()
   console.log('SyndicateERC20 deployed at', syn.address)
 
@@ -46,6 +44,8 @@ async function main() {
       await deployUtils.sleep(1000)
     }
   }
+  await (await syn.updateFeatures(features)).wait()
+
   const network = chainId === 1 ? 'ethereum'
       : chainId == 42 ? 'kovan'
           : 'localhost'
@@ -57,18 +57,13 @@ To verify SyndicateERC20 source code:
       --network ${network} \\
       ${syn.address} \\
       ${tokenOwner} \\
-      ${process.env.MAX_TOTAL_SUPPLY} \\
+      ${maxTotalSupply} \\
       ${superAdmin} 
       
 `)
 
-  await (await syn.updateFeatures(features)).wait()
 
-  await deployUtils.saveDeployed(chainId, ['SyndicateERC20'
-    // , 'TeamVesting'
-  ], [syn.address
-    // , vesting.address
-  ])
+  await deployUtils.saveDeployed(chainId, ['SyndicateERC20'], [syn.address])
 }
 
 main()

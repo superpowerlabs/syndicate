@@ -16,31 +16,33 @@ async function main() {
   const chainId = await deployUtils.currentChainId()
   console.log('chainId', chainId)
 
-  const [owner, tokenOwner] = await ethers.getSigners()
+  const [owner] = await ethers.getSigners()
 
-  const {SYN_PER_BLOCK, BLOCK_PER_UPDATE, BLOCK_MULTIPLIER, WEIGHT} = process.env
-  if (!SYN_PER_BLOCK || !BLOCK_PER_UPDATE || !BLOCK_MULTIPLIER || !WEIGHT) {
-    throw new Error('Missing parameters')
-  }
+  const synPerBlock = process.env.SYN_PER_BLOCK || '360000000000000000000'
+  const blockPerUpdate = process.env.BLOCK_PER_UPDATE || 91252
+  const blockMultiplier = process.env.BLOCK_MULTIPLIER || 7120725
+  const weight = process.env.WEIGHT || 200
 
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SyndicatePoolFactory')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
-  const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber() + 40)
+  const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber())
+      + (chainId === 1 ? 6460 : 40)
+
   const poolFactory = await PoolFactory.deploy(
       synAddress,
       ssynAddress,
-      ethers.BigNumber.from(SYN_PER_BLOCK),
-      ethers.BigNumber.from(BLOCK_PER_UPDATE),
+      ethers.BigNumber.from(synPerBlock),
+      ethers.BigNumber.from(blockPerUpdate),
       blockNumberFactoryConstructor,
-      blockNumberFactoryConstructor + parseInt(BLOCK_MULTIPLIER)
+      blockNumberFactoryConstructor + parseInt(blockMultiplier)
   );
   await poolFactory.deployed()
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
 
   const network = chainId === 1 ? 'ethereum'
-      : chainId == 42 ? 'kovan'
+      : chainId === 42 ? 'kovan'
           : 'localhost'
 
   console.log(`
@@ -51,17 +53,17 @@ To verify SyndicatePoolFactory source code:
       ${poolFactory.address} \\
       ${synAddress} \\
       ${ssynAddress} \\
-      ${ethers.BigNumber.from(SYN_PER_BLOCK).toString()} \\
-      ${ethers.BigNumber.from(BLOCK_PER_UPDATE).toString()} \\
+      ${ethers.BigNumber.from(synPerBlock).toString()} \\
+      ${ethers.BigNumber.from(blockPerUpdate).toString()} \\
       ${blockNumberFactoryConstructor} \\
-      ${blockNumberFactoryConstructor + parseInt(BLOCK_MULTIPLIER)} \\
+      ${blockNumberFactoryConstructor + parseInt(blockMultiplier)}
       
 `)
 
   const blockNumberPoolCreation = await ethers.provider.getBlockNumber()
 
   console.log('Creating SyndicateCorePool')
-  const tx = await poolFactory.connect(owner).createPool(synAddress, blockNumberPoolCreation, WEIGHT)
+  const tx = await poolFactory.connect(owner).createPool(synAddress, blockNumberPoolCreation, weight)
   await tx.wait()
 
   const synPoolAddress = await poolFactory.getPoolAddress(synAddress)
@@ -79,7 +81,7 @@ To verify SyndicateCorePool source code:
       ${poolFactory.address} \\
       ${synAddress} \\
       ${blockNumberPoolCreation} \\
-      ${WEIGHT}
+      ${weight}
       
 `)
 
