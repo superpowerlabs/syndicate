@@ -229,6 +229,23 @@ contract SyndicateCorePool is SyndicatePoolBase {
   /**
    * @inheritdoc SyndicatePoolBase
    *
+   * @dev Extends base functionality and updates vault rewards checkpoint
+   */
+  function _updateStakeLock(
+    address _staker,
+    uint256 _depositId,
+    uint64 _lockedUntil,
+    bool _useSSYN
+  ) internal override poolAlive {
+    super._updateStakeLock(_staker, _depositId, _lockedUntil, _useSSYN);
+    User storage user = users[_staker];
+    // updates sub vault rewards value
+    user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
+  }
+
+  /**
+   * @inheritdoc SyndicatePoolBase
+   *
    * @dev Additionally to the parent smart contract, updates vault rewards of the holder,
    *      and updates (increases) pool token reserve (pool tokens value available in the pool)
    */
