@@ -289,7 +289,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
     bool _useSSYN,
     bool _withUpdate
   ) internal override returns (uint256 pendingYield) {
-    _processVaultRewards(_staker);
+    _processVaultRewards(_staker, _withUpdate);
     pendingYield = super._processRewards(_staker, _useSSYN, _withUpdate);
 
     // update `poolTokenReserve` only if this is a SYNR Core Pool
@@ -303,7 +303,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    * @param _staker address of the user (staker) to process rewards for
    */
-  function _processVaultRewards(address _staker) private {
+  function _processVaultRewards(address _staker, bool _withUpdate) private {
     User storage user = users[_staker];
     uint256 pendingVaultClaim = pendingVaultRewards(_staker);
     if (pendingVaultClaim == 0) return;
@@ -317,7 +317,9 @@ contract SyndicateCorePool is SyndicatePoolBase {
       poolTokenReserve -= pendingVaultClaim > poolTokenReserve ? poolTokenReserve : pendingVaultClaim;
     }
 
-    user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
+    if (_withUpdate) {
+      user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
+    }
 
     // transfer fails if pool SYNR balance is not enough - which is a desired behavior
     _transferSyn(_staker, pendingVaultClaim);
