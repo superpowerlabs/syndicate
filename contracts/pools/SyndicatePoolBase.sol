@@ -252,7 +252,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     }
 
     // based on the rewards per weight value, calculate pending rewards;
-    User memory user = users[_staker];
+    User storage user = users[_staker];
     uint256 pending = weightToReward(user.totalWeight, newYieldRewardsPerWeight) - user.subYieldRewards;
     return pending;
   }
@@ -421,7 +421,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    */
   function _pendingYieldRewards(address _staker) internal view returns (uint256 pending) {
     // read user data structure into memory
-    User memory user = users[_staker];
+    User storage user = users[_staker];
 
     // and perform the calculation using the values read
     return weightToReward(user.totalWeight, yieldRewardsPerWeight) - user.subYieldRewards;

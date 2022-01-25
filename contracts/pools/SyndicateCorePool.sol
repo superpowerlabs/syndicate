@@ -97,7 +97,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    * @return pending calculated vault reward value for the given address
    */
   function pendingVaultRewards(address _staker) public view returns (uint256 pending) {
-    User memory user = users[_staker];
+    User storage user = users[_staker];
 
     return weightToReward(user.totalWeight, vaultRewardsPerWeight) - user.subVaultRewards;
   }
@@ -203,7 +203,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
     _sync();
     User storage user = users[_staker];
     if (user.tokenAmount > 0) {
-      _processRewards(_staker, true, false);
+      _processRewards(_staker, false, false);
     }
     uint256 depositWeight = _amount * YEAR_STAKE_WEIGHT_MULTIPLIER;
     Deposit memory newDeposit = Deposit({
