@@ -20,7 +20,7 @@ contract SyndicateFlashPool is SyndicatePoolBase {
   /// @dev Pool expiration time, the pool considered to be disabled once end block is reached
   /// @dev Expired pools don't process any rewards, users are expected to withdraw staked tokens
   ///      from the flash pools once they expire
-  uint64 public endBlock;
+  uint64 public immutable endBlock;
 
   /// @dev Flag indicating pool type, true means "flash pool"
   // solhint-disable-next-line
