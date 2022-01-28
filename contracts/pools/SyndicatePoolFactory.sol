@@ -69,7 +69,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    * @dev End block is the last block when SYNR/block can be decreased;
    *      it is implied that yield farming stops after that block
    */
-  uint32 public endBlock;
+  uint32 public immutable endBlock;
 
   /**
    * @dev Each time the SYNR/block ratio gets updated, the block number
@@ -313,7 +313,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    */
   function changePoolWeight(address poolAddr, uint32 weight) external {
     // verify function is executed either by factory owner or by the pool itself
-    require(msg.sender == owner() || poolExists[msg.sender]);
+    require(msg.sender == owner() || poolExists[msg.sender], "access denied");
 
     // recalculate total weight
     totalWeight = totalWeight + weight - IPool(poolAddr).weight();
