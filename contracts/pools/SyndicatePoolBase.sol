@@ -85,10 +85,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   uint256 internal constant YEAR_STAKE_WEIGHT_MULTIPLIER = 2 * WEIGHT_MULTIPLIER;
 
   /**
-   * @dev Rewards per weight are stored multiplied by 1e12, as integers.
+   * @dev Rewards per weight are stored multiplied by 1e20, as integers.
    */
   // solhint-disable-next-line
-  uint256 internal constant REWARD_PER_WEIGHT_MULTIPLIER = 1e12;
+  uint256 internal constant REWARD_PER_WEIGHT_MULTIPLIER = 1e20;
 
   /**
    * @dev Fired in _stake() and stake()
@@ -252,7 +252,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     }
 
     // based on the rewards per weight value, calculate pending rewards;
-    User memory user = users[_staker];
+    User storage user = users[_staker];
     uint256 pending = weightToReward(user.totalWeight, newYieldRewardsPerWeight) - user.subYieldRewards;
     return pending;
   }
@@ -349,10 +349,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint64 lockedUntil,
     bool useSSYN
   ) external {
-    // sync and call processRewards
-    _processRewards(msg.sender, useSSYN, true);
     // delegate call to an internal function
-    _updateStakeLock(msg.sender, depositId, lockedUntil);
+    _updateStakeLock(msg.sender, depositId, lockedUntil, useSSYN);
   }
 
   /**
@@ -421,7 +419,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    */
   function _pendingYieldRewards(address _staker) internal view returns (uint256 pending) {
     // read user data structure into memory
-    User memory user = users[_staker];
+    User storage user = users[_staker];
 
     // and perform the calculation using the values read
     return weightToReward(user.totalWeight, yieldRewardsPerWeight) - user.subYieldRewards;
@@ -697,17 +695,23 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @param _staker an address to update stake lock
    * @param _depositId updated deposit ID
    * @param _lockedUntil updated deposit locked until value
+   * @param _useSSYN used for _processRewards check if it should use SYNR or sSYNR
    */
   function _updateStakeLock(
     address _staker,
     uint256 _depositId,
-    uint64 _lockedUntil
-  ) internal poolAlive {
+    uint64 _lockedUntil,
+    bool _useSSYN
+  ) internal virtual poolAlive {
+    // synchronizes pool state
+    _sync();
     // validate the input time
     require(_lockedUntil > now256(), "lock should be in the future");
-
     // get a link to user data struct, we will write to it later
     User storage user = users[_staker];
+    if (user.tokenAmount > 0) {
+      _processRewards(_staker, _useSSYN, false);
+    }
     // get a link to the corresponding deposit, we may write to it later
     Deposit storage stakeDeposit = user.deposits[_depositId];
 
@@ -733,8 +737,9 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // update weight
     stakeDeposit.weight = newWeight;
 
-    // update user total weight and global locking weight
+    // update user total weight, sub yield rewards and global locking weight
     user.totalWeight = user.totalWeight - previousWeight + newWeight;
+    user.subYieldRewards = weightToReward(user.totalWeight, yieldRewardsPerWeight);
     usersLockingWeight = usersLockingWeight - previousWeight + newWeight;
 
     // emit an event
