@@ -97,7 +97,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    * @return pending calculated vault reward value for the given address
    */
   function pendingVaultRewards(address _staker) public view returns (uint256 pending) {
-    User memory user = users[_staker];
+    User storage user = users[_staker];
 
     return weightToReward(user.totalWeight, vaultRewardsPerWeight) - user.subVaultRewards;
   }
@@ -203,15 +203,15 @@ contract SyndicateCorePool is SyndicatePoolBase {
     _sync();
     User storage user = users[_staker];
     if (user.tokenAmount > 0) {
-      _processRewards(_staker, true, false);
+      _processRewards(_staker, false, false);
     }
     uint256 depositWeight = _amount * YEAR_STAKE_WEIGHT_MULTIPLIER;
     Deposit memory newDeposit = Deposit({
-      tokenAmount: _amount,
-      lockedFrom: uint64(now256()),
-      lockedUntil: uint64(now256() + 365 days),
-      weight: depositWeight,
-      isYield: true
+    tokenAmount: _amount,
+    lockedFrom: uint64(now256()),
+    lockedUntil: uint64(now256() + 365 days),
+    weight: depositWeight,
+    isYield: true
     });
     user.tokenAmount += _amount;
     user.totalWeight += depositWeight;
@@ -224,6 +224,23 @@ contract SyndicateCorePool is SyndicatePoolBase {
 
     // update `poolTokenReserve` only if this is a LP Core Pool (stakeAsPool can be executed only for LP pool)
     poolTokenReserve += _amount;
+  }
+
+  /**
+   * @inheritdoc SyndicatePoolBase
+   *
+   * @dev Extends base functionality and updates vault rewards checkpoint
+   */
+  function _updateStakeLock(
+    address _staker,
+    uint256 _depositId,
+    uint64 _lockedUntil,
+    bool _useSSYN
+  ) internal override poolAlive {
+    super._updateStakeLock(_staker, _depositId, _lockedUntil, _useSSYN);
+    User storage user = users[_staker];
+    // updates sub vault rewards value
+    user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
   }
 
   /**
@@ -289,7 +306,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
     bool _useSSYN,
     bool _withUpdate
   ) internal override returns (uint256 pendingYield) {
-    _processVaultRewards(_staker);
+    _processVaultRewards(_staker, _withUpdate);
     pendingYield = super._processRewards(_staker, _useSSYN, _withUpdate);
 
     // update `poolTokenReserve` only if this is a SYNR Core Pool
@@ -303,7 +320,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *
    * @param _staker address of the user (staker) to process rewards for
    */
-  function _processVaultRewards(address _staker) private {
+  function _processVaultRewards(address _staker, bool _withUpdate) private {
     User storage user = users[_staker];
     uint256 pendingVaultClaim = pendingVaultRewards(_staker);
     if (pendingVaultClaim == 0) return;
@@ -317,7 +334,9 @@ contract SyndicateCorePool is SyndicatePoolBase {
       poolTokenReserve -= pendingVaultClaim > poolTokenReserve ? poolTokenReserve : pendingVaultClaim;
     }
 
-    user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
+    if (_withUpdate) {
+      user.subVaultRewards = weightToReward(user.totalWeight, vaultRewardsPerWeight);
+    }
 
     // transfer fails if pool SYNR balance is not enough - which is a desired behavior
     _transferSyn(_staker, pendingVaultClaim);
