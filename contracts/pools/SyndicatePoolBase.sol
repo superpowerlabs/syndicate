@@ -489,11 +489,11 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // create and save the deposit (append it to deposits array)
     Deposit memory deposit = Deposit({
-    tokenAmount: addedAmount,
-    weight: stakeWeight,
-    lockedFrom: lockFrom,
-    lockedUntil: lockUntil,
-    isYield: _isYield
+      tokenAmount: addedAmount,
+      weight: stakeWeight,
+      lockedFrom: lockFrom,
+      lockedUntil: lockUntil,
+      isYield: _isYield
     });
     // deposit ID is an index of the deposit in `deposits` array
     user.deposits.push(deposit);
@@ -510,7 +510,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     emit Staked(msg.sender, _staker, _amount);
   }
 
-  function getStakeWight(uint lockedTime, uint addedAmount) public view returns(uint) {
+  function getStakeWight(uint256 lockedTime, uint256 addedAmount) public view returns (uint256) {
     return ((lockedTime * WEIGHT_MULTIPLIER) / 365 days + WEIGHT_MULTIPLIER) * addedAmount;
   }
 
@@ -550,8 +550,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // recalculate deposit weight
     uint256 previousWeight = stakeDeposit.weight;
     uint256 newWeight = (((stakeDeposit.lockedUntil - stakeDeposit.lockedFrom) * WEIGHT_MULTIPLIER) /
-    365 days +
-    WEIGHT_MULTIPLIER) * (stakeDeposit.tokenAmount - _amount);
+      365 days +
+      WEIGHT_MULTIPLIER) * (stakeDeposit.tokenAmount - _amount);
 
     // update the deposit, or delete it if its depleted
     if (stakeDeposit.tokenAmount - _amount == 0) {
@@ -664,11 +664,11 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
       // if the pool is SYNR Pool - create new SYNR deposit
       // and save it - push it into deposits array
       Deposit memory newDeposit = Deposit({
-      tokenAmount: pendingYield,
-      lockedFrom: uint64(now256()),
-      lockedUntil: uint64(now256() + 365 days), // staking yield for 1 year
-      weight: depositWeight,
-      isYield: true
+        tokenAmount: pendingYield,
+        lockedFrom: uint64(now256()),
+        lockedUntil: uint64(now256() + 365 days), // staking yield for 1 year
+        weight: depositWeight,
+        isYield: true
       });
       user.deposits.push(newDeposit);
 
@@ -733,8 +733,8 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     // update locked until value, calculate new weight
     stakeDeposit.lockedUntil = _lockedUntil;
     uint256 newWeight = (((stakeDeposit.lockedUntil - stakeDeposit.lockedFrom) * WEIGHT_MULTIPLIER) /
-    365 days +
-    WEIGHT_MULTIPLIER) * stakeDeposit.tokenAmount;
+      365 days +
+      WEIGHT_MULTIPLIER) * stakeDeposit.tokenAmount;
 
     // save previous weight
     uint256 previousWeight = stakeDeposit.weight;

@@ -207,11 +207,11 @@ contract SyndicateCorePool is SyndicatePoolBase {
     }
     uint256 depositWeight = _amount * YEAR_STAKE_WEIGHT_MULTIPLIER;
     Deposit memory newDeposit = Deposit({
-    tokenAmount: _amount,
-    lockedFrom: uint64(now256()),
-    lockedUntil: uint64(now256() + 365 days),
-    weight: depositWeight,
-    isYield: true
+      tokenAmount: _amount,
+      lockedFrom: uint64(now256()),
+      lockedUntil: uint64(now256() + 365 days),
+      weight: depositWeight,
+      isYield: true
     });
     user.tokenAmount += _amount;
     user.totalWeight += depositWeight;
