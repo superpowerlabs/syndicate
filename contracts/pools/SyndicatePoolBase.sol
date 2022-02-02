@@ -510,7 +510,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     emit Staked(msg.sender, _staker, _amount);
   }
 
-  function getStakeWight(uint256 lockedTime, uint256 addedAmount) public view returns (uint256) {
+  function getStakeWight(uint256 lockedTime, uint256 addedAmount) public pure returns (uint256) {
     return ((lockedTime * WEIGHT_MULTIPLIER) / 365 days + WEIGHT_MULTIPLIER) * addedAmount;
   }
 
