@@ -38,7 +38,7 @@ contract SyntheticSyndicateERC20 is ERC20("Synthetic Syndicate Token", "sSYNR"),
   }
 
   /**
-   * @notice Must be called by ROLE_TOKEN_DESTROYER addresses (SynSwapper)
+   * @notice Must be called by ROLE_TOKEN_DESTROYER addresses (SynrSwapper)
    *         Can burn only tokens owned by ROLE_WHITE_LISTED_RECEIVER address
    * @param recipient address to burn the tokens.
    * @param amount number of tokens to be burned

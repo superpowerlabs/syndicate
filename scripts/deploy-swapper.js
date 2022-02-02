@@ -28,25 +28,25 @@ async function main() {
 
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
-  console.log('Deploying SynSwapper')
-  const SynSwapper = await ethers.getContractFactory("SynSwapper")
-  const synSwapper = await SynSwapper.deploy(
+  console.log('Deploying SynrSwapper')
+  const SynrSwapper = await ethers.getContractFactory("SynrSwapper")
+  const synrSwapper = await SynrSwapper.deploy(
       superAdmin,
       synAddress,
       ssynAddress);
-  await synSwapper.deployed()
-  console.log('SynSwapper deployed at', synSwapper.address)
+  await synrSwapper.deployed()
+  console.log('SynrSwapper deployed at', synrSwapper.address)
 
   const network = chainId === 1 ? 'ethereum'
       : chainId == 42 ? 'kovan'
           : 'localhost'
 
   console.log(`
-To verify SynSwapper source code:
+To verify SynrSwapper source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${synSwapper.address} \\
+      ${synrSwapper.address} \\
       ${superAdmin} \\
       ${synAddress} \\
       ${ssynAddress}
@@ -54,8 +54,8 @@ To verify SynSwapper source code:
 `)
 
   await deployUtils.saveDeployed(chainId,
-      ['SynSwapper'],
-      [synSwapper.address]
+      ['SynrSwapper'],
+      [synrSwapper.address]
   )
 
 }

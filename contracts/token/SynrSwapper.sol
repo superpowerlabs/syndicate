@@ -16,7 +16,7 @@ import "../utils/AccessControl.sol";
  *
  * @author Francesco Sullo
  */
-contract SynSwapper is AccessControl {
+contract SynrSwapper is AccessControl {
   event SynSwapped(address swapper, uint256 amount);
 
   address public owner;

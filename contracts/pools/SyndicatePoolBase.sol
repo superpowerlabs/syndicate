@@ -482,7 +482,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint64 lockUntil = _lockUntil;
 
     // stake weight formula rewards for locking
-    uint256 stakeWeight = (((lockUntil - lockFrom) * WEIGHT_MULTIPLIER) / 365 days + WEIGHT_MULTIPLIER) * addedAmount;
+    uint256 stakeWeight = getStakeWeight(lockUntil - lockFrom, addedAmount);
 
     // makes sure stakeWeight is valid
     assert(stakeWeight > 0);
@@ -508,6 +508,10 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
 
     // emit an event
     emit Staked(msg.sender, _staker, _amount);
+  }
+
+  function getStakeWeight(uint256 lockedTime, uint256 addedAmount) public pure returns (uint256) {
+    return ((lockedTime * WEIGHT_MULTIPLIER) / 365 days + WEIGHT_MULTIPLIER) * addedAmount;
   }
 
   /**
