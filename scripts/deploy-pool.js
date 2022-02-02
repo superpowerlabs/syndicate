@@ -20,7 +20,7 @@ async function main() {
 
   const synPerBlock = process.env.SYN_PER_BLOCK || '360000000000000000000'
   const blockPerUpdate = process.env.BLOCK_PER_UPDATE || 91252
-  const blockMultiplier = process.env.BLOCK_MULTIPLIER || 7120725
+  const threeYearsBlocks = process.env.THREE_YEARS_BLOCKS || 7120725
   const weight = process.env.WEIGHT || 200
   const delay = process.env.DELAY || 6460 // 24 hours
 
@@ -37,7 +37,7 @@ async function main() {
       ethers.BigNumber.from(synPerBlock),
       ethers.BigNumber.from(blockPerUpdate),
       blockNumberFactoryConstructor,
-      blockNumberFactoryConstructor + 7120725
+      blockNumberFactoryConstructor + parseInt(threeYearsBlocks)
   );
   await poolFactory.deployed()
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
@@ -57,7 +57,7 @@ To verify SyndicatePoolFactory source code:
       ${ethers.BigNumber.from(synPerBlock).toString()} \\
       ${ethers.BigNumber.from(blockPerUpdate).toString()} \\
       ${blockNumberFactoryConstructor} \\
-      ${blockNumberFactoryConstructor + 7120725}
+      ${blockNumberFactoryConstructor + parseInt(threeYearsBlocks)}
       
 `)
 
