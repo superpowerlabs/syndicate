@@ -22,14 +22,14 @@ async function main() {
   const blockPerUpdate = process.env.BLOCK_PER_UPDATE || 91252
   const blockMultiplier = process.env.BLOCK_MULTIPLIER || 7120725
   const weight = process.env.WEIGHT || 200
+  const delay = process.env.DELAY || 6460 // 24 hours
 
   const synAddress = deployed[chainId].SyndicateERC20
   const ssynAddress = deployed[chainId].SyntheticSyndicateERC20
   console.log('Deploying SyndicatePoolFactory')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
   const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber())
-      // 24 hours later
-      + (chainId === 1 ? 6460 : 40)
+      + (chainId === 1 ? delay : chainId === 42 ? 40 : 1)
 
   const poolFactory = await PoolFactory.deploy(
       synAddress,
@@ -37,7 +37,7 @@ async function main() {
       ethers.BigNumber.from(synPerBlock),
       ethers.BigNumber.from(blockPerUpdate),
       blockNumberFactoryConstructor,
-      blockNumberFactoryConstructor + parseInt(blockMultiplier)
+      blockNumberFactoryConstructor + 7120725
   );
   await poolFactory.deployed()
   console.log('SyndicatePoolFactory deployed at', poolFactory.address)
@@ -57,7 +57,7 @@ To verify SyndicatePoolFactory source code:
       ${ethers.BigNumber.from(synPerBlock).toString()} \\
       ${ethers.BigNumber.from(blockPerUpdate).toString()} \\
       ${blockNumberFactoryConstructor} \\
-      ${blockNumberFactoryConstructor + parseInt(blockMultiplier)}
+      ${blockNumberFactoryConstructor + 7120725}
       
 `)
 
