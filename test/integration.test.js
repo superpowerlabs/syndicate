@@ -14,7 +14,7 @@ describe("Integration test", function () {
   let SyntheticSyndicateERC20, sSynr
   let SyndicateCorePool, corePool
   let SyndicatePoolFactory, factory
-  let SynSwapper, swapper
+  let SynrSwapper, swapper
 
   let deployer, fundOwner, superAdmin, operator, user1, user2, marketplace, treasury
 
@@ -25,7 +25,7 @@ describe("Integration test", function () {
     SyntheticSyndicateERC20 = await ethers.getContractFactory("SyntheticSyndicateERC20");
     SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");
     SyndicatePoolFactory = await ethers.getContractFactory("SyndicatePoolFactory");
-    SynSwapper = await ethers.getContractFactory("SynSwapper");
+    SynrSwapper = await ethers.getContractFactory("SynrSwapper");
   })
 
   async function initAndDeploy() {
@@ -49,7 +49,7 @@ describe("Integration test", function () {
     );
     await factory.deployed()
 
-    swapper = await SynSwapper.deploy(superAdmin.address, synr.address, sSynr.address);
+    swapper = await SynrSwapper.deploy(superAdmin.address, synr.address, sSynr.address);
     await swapper.deployed()
 
   }
@@ -92,14 +92,14 @@ describe("Integration test", function () {
 
       await corePool.connect(user1).stake(normalize(1000),
           (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
-      expect(await sSynr.balanceOf(user1.address)).equal('359999820000000000000')
+      expect(await sSynr.balanceOf(user1.address)).equal('359999999999989999960')
 
       expect(await corePool.pendingYieldRewards(user1.address)).equal(0);
       await network.provider.send("evm_mine");
 
-      expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(359.99982);
+      expect(((await corePool.pendingYieldRewards(user1.address)) / 1e18).toString()).equal('359.99999999999');
       await network.provider.send("evm_mine"); // 13
-      expect((await corePool.pendingYieldRewards(user1.address)) / 1e18).equal(719.99964);
+      expect(((await corePool.pendingYieldRewards(user1.address)) / 1e18).toString()).equal('719.99999999998');
 
       expect((await synr.balanceOf(user1.address)) / 1e18).equal(18000);
       await network.provider.send("evm_increaseTime", [366 * 24 * 3600])
@@ -108,7 +108,7 @@ describe("Integration test", function () {
 
       let unstakeTx = await corePool.connect(user1).unstake(0, normalize(500), true);
       expect((await synr.balanceOf(user1.address)) / 1e18).equal(18500);
-      expect((await sSynr.balanceOf(user1.address)) / 1e18).equal(2159.99892);
+      expect(((await sSynr.balanceOf(user1.address)) / 1e18).toString()).equal('2159.99999999998');
 
       await assertThrowsMessage(swapper.connect(user1).swap(await sSynr.balanceOf(user1.address)),
           'SYNR: not a treasury')

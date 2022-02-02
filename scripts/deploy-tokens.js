@@ -91,29 +91,29 @@ To verify SyntheticSyndicateERC20 source code:
 
   console.log('SyntheticSyndicateERC20 deployed at', ssyn.address)
 
-  console.log('Deploying SynSwapper')
-  const SynSwapper = await ethers.getContractFactory("SynSwapper")
-  const synSwapper = await SynSwapper.deploy(
+  console.log('Deploying SynrSwapper')
+  const SynrSwapper = await ethers.getContractFactory("SynrSwapper")
+  const synrSwapper = await SynrSwapper.deploy(
       superAdmin,
       syn.address,
       ssyn.address);
-  await synSwapper.deployed()
-  console.log('SynSwapper deployed at', synSwapper.address)
+  await synrSwapper.deployed()
+  console.log('SynrSwapper deployed at', synrSwapper.address)
 
   console.log(`
-To verify SynSwapper source code:
+To verify SynrSwapper source code:
     
   npx hardhat verify --show-stack-traces \\
       --network ${network} \\
-      ${synSwapper.address} \\
+      ${synrSwapper.address} \\
       ${superAdmin} \\
       ${syn.address} \\
       ${ssyn.address}
       
 `)
 
-  await deployUtils.saveDeployed(chainId, ['SyndicateERC20', 'SyntheticSyndicateERC20', 'SynSwapper'],
-      [syn.address, ssyn.address, synSwapper.address])
+  await deployUtils.saveDeployed(chainId, ['SyndicateERC20', 'SyntheticSyndicateERC20', 'SynrSwapper'],
+      [syn.address, ssyn.address, synrSwapper.address])
 }
 
 main()
