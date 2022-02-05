@@ -63,13 +63,15 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    * @dev SYNR/block decreases by 3% every blocks/update (set to 91252 blocks during deployment);
    *      an update is triggered by executing `updateSYNPerBlock` public function
    */
-  uint32 public immutable blocksPerUpdate;
+  uint32 public blocksPerUpdate;
 
   /**
    * @dev End block is the last block when SYNR/block can be decreased;
    *      it is implied that yield farming stops after that block
    */
-  uint32 public immutable endBlock;
+  uint32 public endBlock;
+
+  uint32 public decayFactor = 97;
 
   /**
    * @dev Each time the SYNR/block ratio gets updated, the block number
@@ -272,7 +274,7 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     require(shouldUpdateRatio(), "too frequent");
 
     // decreases SYNR/block reward by 3%
-    synrPerBlock = (synrPerBlock * 97) / 100;
+    synrPerBlock = (synrPerBlock * decayFactor) / 100;
 
     // set current block as the last ratio update block
     lastRatioUpdate = uint32(blockNumber());
@@ -285,6 +287,18 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     synrPerBlock = _synrPerBlock;
     // emit an event
     emit SynRatioUpdated(msg.sender, synrPerBlock);
+  }
+
+  function overrideBlockesPerUpdate(uint32 _blocksPerUpdate) external onlyOwner {
+    blocksPerUpdate = _blocksPerUpdate;
+  }
+
+  function overrideEndblock(uint32 _endBlock) external onlyOwner {
+    endBlock = _endBlock;
+  }
+
+  function overrideDecayFactor(uint32 _decayFactor) external onlyOwner {
+    decayFactor = _decayFactor;
   }
 
   /**
