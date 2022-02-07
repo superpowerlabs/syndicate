@@ -35,6 +35,9 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
    */
   uint256 public constant FACTORY_UID = 0xc5cfd88c6e4d7e5c8a03c0f0f03af23c0918d8e82cac196f57466af3fd4a5ec7;
 
+  // the pool contract's parameters cannot be changed once it's final
+  bool public isFinal = false;
+
   /// @dev Auxiliary data structure used only in getPoolData() view function
   struct PoolData {
     // @dev pool token address (like SYNR)
@@ -89,6 +92,11 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
 
   /// @dev Keeps track of registered pool addresses, maps pool address -> exists flag
   mapping(address => bool) public poolExists;
+
+  modifier notFinal() {
+    require(! isFinal, "pool is final");
+    _;
+  }
 
   /**
    * @dev Fired in createPool() and registerPool()
@@ -283,22 +291,26 @@ contract SyndicatePoolFactory is Ownable, SyndicateAware {
     emit SynRatioUpdated(msg.sender, synrPerBlock);
   }
 
-  function overrideSYNPerBlock(uint192 _synrPerBlock) external onlyOwner {
+  function overrideSYNPerBlock(uint192 _synrPerBlock) external onlyOwner notFinal {
     synrPerBlock = _synrPerBlock;
     // emit an event
     emit SynRatioUpdated(msg.sender, synrPerBlock);
   }
 
-  function overrideBlockesPerUpdate(uint32 _blocksPerUpdate) external onlyOwner {
+  function overrideBlockesPerUpdate(uint32 _blocksPerUpdate) external onlyOwner notFinal {
     blocksPerUpdate = _blocksPerUpdate;
   }
 
-  function overrideEndblock(uint32 _endBlock) external onlyOwner {
+  function overrideEndblock(uint32 _endBlock) external onlyOwner notFinal {
     endBlock = _endBlock;
   }
 
-  function overrideDecayFactor(uint32 _decayFactor) external onlyOwner {
+  function overrideDecayFactor(uint32 _decayFactor) external onlyOwner notFinal {
     decayFactor = _decayFactor;
+  }
+
+  function finalizePool() external onlyOwner {
+    isFinal = true;
   }
 
   /**
