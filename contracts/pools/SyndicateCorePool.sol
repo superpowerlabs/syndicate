@@ -186,7 +186,7 @@ contract SyndicateCorePool is SyndicatePoolBase {
    *      (poolToken is SYNR token), or new pool deposit gets created together with sSYNR minted
    *      when pool is not an SYNR pool (poolToken is not an SYNR token)
    */
-  function processRewards(bool _useSSYN) external override {
+  function processRewards(bool _useSSYN) external override poolAlive {
     _processRewards(msg.sender, _useSSYN, true);
   }
 
