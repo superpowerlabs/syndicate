@@ -348,7 +348,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 depositId,
     uint64 lockedUntil,
     bool useSSYN
-  ) external {
+  ) external poolAlive {
     // delegate call to an internal function
     _updateStakeLock(msg.sender, depositId, lockedUntil, useSSYN);
   }
@@ -363,7 +363,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev When timing conditions are not met (executed too frequently, or after factory
    *      end block), function doesn't throw and exits silently
    */
-  function sync() external override {
+  function sync() external override poolAlive {
     // delegate call to an internal function
     _sync();
   }
@@ -385,7 +385,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    *      (poolToken is SYNR token), or new pool deposit gets created together with sSYNR minted
    *      when pool is not an SYNR pool (poolToken is not an SYNR token)
    */
-  function processRewards(bool _useSSYN) external virtual override {
+  function processRewards(bool _useSSYN) external virtual override poolAlive {
     // delegate call to an internal function
     _processRewards(msg.sender, _useSSYN, true);
   }
@@ -446,7 +446,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint64 _lockUntil,
     bool _useSSYN,
     bool _isYield
-  ) internal virtual poolAlive {
+  ) internal virtual {
     // validate the inputs
     require(_amount > 0, "SyndicatePoolBase: zero amount");
     // we need to the limit of max locking time to limit the yield bonus
@@ -527,7 +527,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint256 _amount,
     bool _useSSYN
-  ) internal virtual poolAlive {
+  ) internal virtual {
     // verify an amount is set
     require(_amount > 0, "zero amount");
 
@@ -588,7 +588,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
    * @dev Updates smart contract state (`yieldRewardsPerWeight`, `lastYieldDistribution`),
    *      updates factory state via `updateSYNPerBlock`
    */
-  function _sync() internal virtual poolAlive {
+  function _sync() internal virtual {
     // update SYNR per block value in factory if required
     if (factory.shouldUpdateRatio()) {
       factory.updateSYNPerBlock();
@@ -637,7 +637,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     address _staker,
     bool _useSSYN,
     bool _withUpdate
-  ) internal virtual poolAlive returns (uint256 pendingYield) {
+  ) internal virtual returns (uint256 pendingYield) {
     // update smart contract state if required
     if (_withUpdate) {
       _sync();
@@ -706,7 +706,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint64 _lockedUntil,
     bool _useSSYN
-  ) internal virtual poolAlive {
+  ) internal virtual {
     // synchronizes pool state
     _sync();
     // validate the input time
