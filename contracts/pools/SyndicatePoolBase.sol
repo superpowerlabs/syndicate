@@ -309,7 +309,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _amount,
     uint64 _lockUntil,
     bool _useSSYN
-  ) external override {
+  ) external override poolAlive {
     // delegate call to an internal function
     _stake(msg.sender, _amount, _lockUntil, _useSSYN, false);
   }
@@ -327,7 +327,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
     uint256 _depositId,
     uint256 _amount,
     bool _useSSYN
-  ) external override {
+  ) external override poolAlive {
     // delegate call to an internal function
     _unstake(msg.sender, _depositId, _amount, _useSSYN);
   }
