@@ -53,6 +53,15 @@ To verify SynrSwapper source code:
       
 `)
 
+  const SYN = await ethers.getContractFactory("SyndicateERC20")
+  const syn = await SYN.attach(synAddress)
+
+  const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20")
+  const ssyn = await SSYN.attach(ssynAddress)
+
+  await ssyn.updateRole(synrSwapper.address, await ssyn.ROLE_TOKEN_DESTROYER());
+  await syn.updateRole(synrSwapper.address, await syn.ROLE_TOKEN_CREATOR());
+
   await deployUtils.saveDeployed(chainId,
       ['SynrSwapper'],
       [synrSwapper.address]
