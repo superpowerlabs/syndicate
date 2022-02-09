@@ -95,7 +95,9 @@ To verify SyndicateCorePool source code:
   const SSYN = await ethers.getContractFactory("SyntheticSyndicateERC20")
   const ssyn = await SSYN.attach(deployed[chainId].SyntheticSyndicateERC20)
 
+  // for safety we will give this role to the pool only before the 16 weeks ends
   // await syn.connect(owner).updateRole(poolFactory.address, await syn.ROLE_TOKEN_CREATOR());
+
   await ssyn.connect(owner).updateRole(corePool.address, await ssyn.ROLE_TOKEN_CREATOR());
   console.log('Pool authorized to manage sSYN')
 
