@@ -216,16 +216,33 @@ describe("Integration test", function () {
       await synr.connect(user1).approve(corePool.address, ethers.utils.parseEther("10000"));
       await corePool.connect(user1).stake(normalize(1000),
           (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
+      //console.log((await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600)
+
+      //console.log((await ethers.provider.getBlock()).timestamp)
 
       await increaseBlockTimestampBy(366 * 24 * 3600);
-      let balanceUserBefore = await corePool.pendingYieldRewards(user1.address)
-      console.log(balanceUserBefore)
+      const balanceAfterYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterYear)
+      //console.log((await ethers.provider.getBlock()).timestamp)
 
-        await increaseBlockTimestampBy(366 * 24 * 3600);
-        balanceUserAfter = await corePool.pendingYieldRewards(user1.address)
-      console.log(balanceUserAfter)
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+      //console.log((await ethers.provider.getBlock()).timestamp)
 
-        expect(balanceUserAfter).equal(balanceUserBefore)
+      const balanceAfterTwoYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterTwoYear)
+
+      //expect(balanceAfterTwoYear).equal(balanceAfterYear)
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+      //console.log((await ethers.provider.getBlock()).timestamp)
+
+      const balanceAfterThreeYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterThreeYear)
+
+      expect(balanceAfterTwoYear).equal(balanceAfterYear)
+      expect(balanceAfterThreeYear).equal(balanceAfterYear)
+
+
     })
   })
 })
