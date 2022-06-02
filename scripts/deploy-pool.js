@@ -29,8 +29,7 @@ async function main() {
   console.log('Deploying SyndicatePoolFactory')
   const PoolFactory = await ethers.getContractFactory("SyndicatePoolFactory")
   const blockNumberFactoryConstructor = (await ethers.provider.getBlockNumber())
-      // + 1
-      //(chainId === 1 ? delay : chainId === 42 ? 40 : 1)
+      + (chainId === 1 ? delay : chainId === 42 ? 40 : 1)
 
   const poolFactory = await PoolFactory.deploy(
       synAddress,

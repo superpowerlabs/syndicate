@@ -52,7 +52,7 @@ abstract contract SyndicatePoolBase is IPool, SyndicateAware, ReentrancyGuard {
   /// @dev Pool weight, 100 for SYNR pool or 900 for SYNR/ETH
   uint32 public override weight;
 
-  /// @dev Block number of the last yield distribution eventa
+  /// @dev Block number of the last yield distribution event
   uint64 public override lastYieldDistribution;
 
   /// @dev Used to calculate yield rewards
