@@ -198,8 +198,51 @@ describe("Integration test", function () {
       expect(await synr.symbol()).equal('SNX')
     })
 
+    it.only("testing reward after lock time", async function () {
+      await sSynr.connect(superAdmin).updateRole(swapper.address, await sSynr.ROLE_TOKEN_DESTROYER());
+      await synr.connect(deployer).updateRole(swapper.address, await synr.ROLE_TOKEN_CREATOR());
 
+      await synr.connect(fundOwner).transfer(user1.address, normalize(20000));
+
+      await factory.createPool(synr.address, await ethers.provider.getBlockNumber(), 1);
+      await synr.userRoles(deployer.address).toString()
+      await synr.connect(superAdmin).updateRole(deployer.address, 0);
+     await synr.userRoles(deployer.address).toString()
+      
+      const corePoolAddress = await factory.getPoolAddress(synr.address);
+      const SyndicateCorePool = await ethers.getContractFactory("SyndicateCorePool");
+      const corePool = await SyndicateCorePool.attach(corePoolAddress);
+
+      await synr.connect(user1).approve(corePool.address, ethers.utils.parseEther("10000"));
+      await corePool.connect(user1).stake(normalize(1000),
+          (await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600, true);
+      //console.log((await ethers.provider.getBlock()).timestamp + 365 * 24 * 3600)
+
+      //console.log((await ethers.provider.getBlock()).timestamp)
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+      const balanceAfterYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterYear)
+      //console.log((await ethers.provider.getBlock()).timestamp)
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+      //console.log((await ethers.provider.getBlock()).timestamp)
+
+      const balanceAfterTwoYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterTwoYear)
+
+      //expect(balanceAfterTwoYear).equal(balanceAfterYear)
+
+      await increaseBlockTimestampBy(366 * 24 * 3600);
+      //console.log((await ethers.provider.getBlock()).timestamp)
+
+      const balanceAfterThreeYear = await corePool.pendingYieldRewards(user1.address)
+      //console.log(balanceAfterThreeYear)
+
+      expect(balanceAfterTwoYear).equal(balanceAfterYear)
+      expect(balanceAfterThreeYear).equal(balanceAfterYear)
+
+
+    })
   })
-
-
 })
